@@ -18,7 +18,7 @@ const Category = () => {
 
   return (
     <div className="container mx-auto">
-      <div className="text-lg font-bold  ">Danh mục</div>
+      <div className="text-2xl font-bold  ">Danh mục</div>
       <div className="mt-6 flex flex-wrap mx-30">
         <Swiper
           modules={[Navigation]}
@@ -32,10 +32,7 @@ const Category = () => {
               <div className="grid grid-cols-5 gap-y-8">
                 {page.map((item) => (
                   <div className="text-center" key={item.id}>
-                    <div
-                      className="mx-auto mb-2 inline-flex h-20 w-20 items-center justify-center rounded-full"
-                      style={{ backgroundColor: "#F3D7A1" }}
-                    >
+                    <div className="mx-auto mb-2 inline-flex h-20 w-20 items-center justify-center rounded-full bg-[#F3D7A1]">
                       i
                     </div>
 
