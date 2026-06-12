@@ -11,16 +11,18 @@ const ProductList = ({ data }) => {
       </CardHeader>
 
       <CardContent className="p-4">
-        <h3 className="text-lg font-bold">{data.name}</h3>
+        <h3 className="text-lg font-bold text-[#7A5C4E]">{data.name}</h3>
 
-        <p className="mt-2 text-sm text-slate-500">{data.description}</p>
+        <p className="mt-2 text-sm text-slate-500 text-[#8A6852]">
+          {data.description}
+        </p>
 
         <div className="mt-4 flex items-center justify-between">
-          <span className="text-xl font-bold text-[#FFC13B]">
+          <span className="text-xl font-bold text-[#A67C52]">
             {ulti.formatVND(data.price)}
           </span>
 
-          <ButtonCustom name="Mua" size="sm"></ButtonCustom>
+          <ButtonCustom name="Mua" size="lg"></ButtonCustom>
         </div>
       </CardContent>
     </Card>

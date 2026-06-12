@@ -1,18 +1,29 @@
 import { Search, ShoppingBag, User } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const navItems = [
-  { label: "Trang chủ", to: "/" },
-  { label: "Thực đơn", to: "/menu" },
-  { label: "Mini Game", to: "/mini-game" },
-  { label: "Tin tức", to: "/tin-tuc" },
-];
-
-export default function Header() {
+const NewHeader = () => {
+  const navItems = [
+    { label: "Trang chủ", to: "/" },
+    { label: "Thực đơn", to: "/menu" },
+    { label: "Mini Game", to: "/mini-game" },
+    { label: "Tin tức", to: "/tin-tuc" },
+  ];
   return (
-    <header className="w-full sticky top-0 z-[999]">
-      <div className="bg-[#FFFBF3]">
-        <div className="container mx-auto py-2 grid grid-cols-3">
+    <>
+      <div className="py-1 bg-[#C8A27A] text-[#fff] text-base">
+        <div className=" container mx-auto">
+          <div className=" mx-50 flex justify-between">
+            <div className="font-semibold">Hotline: 000 0000 000</div>
+            <div className="flex justify-between gap-4">
+              <div>About us</div>
+              <div>Địa chỉ</div>
+              <p></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="sticky top-0 py-4 bg-[#fff] z-[999] border">
+        <div className="container mx-auto  grid grid-cols-3">
           {/* Logo - Đã cập nhật link ảnh */}
           <div className="shrink-0">
             <Link to="/">
@@ -63,19 +74,8 @@ export default function Header() {
           </div>
         </div>
       </div>
-
-      {/* Scallop bottom */}
-      {/* <div className="relative">
-        <div
-          className="absolute top-0 left-0 w-full h-6 z-20 pointer-events-none"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 12px 0, #FFC13B 12px, transparent 13px)",
-            backgroundSize: "24px 24px",
-            backgroundRepeat: "repeat-x",
-          }}
-        />
-      </div> */}
-    </header>
+    </>
   );
-}
+};
+
+export default NewHeader;

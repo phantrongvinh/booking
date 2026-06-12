@@ -44,7 +44,15 @@ function PinterestIcon(props) {
 
 function MapIcon(props) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
       <path d="m1 6 7-3 8 3 7-3v14l-7 3-8-3-7 3Z" />
       <path d="M8 3v14" />
       <path d="M16 6v14" />
@@ -58,64 +66,73 @@ export default function Footer() {
   return (
     <footer className="w-full">
       {/* Scallop top */}
-      <div
-        aria-hidden="true"
-        className="h-6 w-full"
-        style={{
-          backgroundImage: "radial-gradient(circle at 12px 24px, #FFC13B 12px, transparent 13px)",
-          backgroundSize: "24px 24px",
-          backgroundRepeat: "repeat-x",
-        }}
-      />
-      
-{/* Thay đổi phần này vào code của bạn */}
-<div className="bg-[#FFE7B3]">
-  <div className="max-w-[1450px] mx-auto px-10 pt-16 pb-16 grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto_1fr] gap-x-12 gap-y-8 text-[#2B1B12] items-center">
-    
-    {/* Cột 1: Logo, Slogan, Socials */}
-    <div className="flex flex-col items-center text-center gap-3">
-       <img src="https://i.ibb.co/v47yVGfx/logo.png" alt="Logo" className="h-16 w-auto object-contain" />
-       <p className="text-base italic">slogan</p>
-       <div className="flex items-center justify-center gap-3">
-          {socials.map(({ label, href, icon: Icon }) => (
-            <a key={label} href={href} className="w-10 h-10 rounded-full bg-white border-2 border-[#2B1B12] flex items-center justify-center hover:bg-[#FFC13B] transition-all">
-              <Icon className="w-5 h-5 text-[#2B1B12]" />
-            </a>
-          ))}
-       </div>
-    </div>
+      <div className="relative">
+        <div
+          className="absolute bottom-0 w-full h-6 z-20 pointer-events-none"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 12px 24px, #C8A27A 12px, transparent 13px)",
+            backgroundSize: "24px 24px",
+            backgroundRepeat: "repeat-x",
+          }}
+        />
+      </div>
 
-    {/* Các cột giữa: Căn giữa theo chiều dọc tự nhiên */}
-    <div className="flex flex-col gap-3">
-      <h3 className="text-lg font-bold">Liên hệ</h3>
-      <p className="text-sm font-semibold">📱 0123456789</p>
-      <p className="text-sm font-semibold">✉️ a@gmail.com</p>
-    </div>
+      {/* Thay đổi phần này vào code của bạn */}
+      <div className="bg-[#FFFBF3]">
+        <div className="mx-auto px-10 pt-16 pb-16 grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto_1fr] gap-x-12 gap-y-8 text-[#2B1B12] ">
+          {/* Cột 1: Logo, Slogan, Socials */}
+          <div className="flex flex-col items-center text-center gap-3">
+            <img
+              src="https://i.ibb.co/v47yVGfx/logo.png"
+              alt="Logo"
+              className="h-16 w-auto object-contain"
+            />
+            <p className="text-base italic">slogan</p>
+            <div className="flex items-center justify-center gap-3">
+              {socials.map(({ label, href, icon: Icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  className="w-10 h-10 rounded-full bg-white border-2 border-[#2B1B12] flex items-center justify-center hover:bg-[#FFC13B] transition-all"
+                >
+                  <Icon className="w-5 h-5 text-[#2B1B12]" />
+                </a>
+              ))}
+            </div>
+          </div>
 
-    <div className="flex flex-col gap-3">
-      <h3 className="text-lg font-bold">Giờ mở cửa</h3>
-      <p className="text-sm font-semibold">Thứ 2 - Thứ 6: 9:00 - 22:00</p>
-    </div>
+          {/* Các cột giữa: Căn giữa theo chiều dọc tự nhiên */}
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-bold">Liên hệ</h3>
+            <p className="text-sm font-semibold">📱 0123456789</p>
+            <p className="text-sm font-semibold">✉️ a@gmail.com</p>
+          </div>
 
-    <div className="flex flex-col gap-3">
-      <h3 className="text-lg font-bold">Địa chỉ</h3>
-      <p className="text-sm font-semibold">📍 123/45/67 Q1, TP HCM</p>
-    </div>
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-bold">Giờ mở cửa</h3>
+            <p className="text-sm font-semibold">Thứ 2 - Thứ 6: 9:00 - 22:00</p>
+          </div>
 
-    {/* Map: Đẩy sang phải một chút nếu cần */}
-    <div className="w-full max-w-[280px] min-h-[140px] rounded-2xl bg-[#F3E7B9] border border-[#E1C96C] flex flex-col items-center justify-center gap-2 mx-auto">
-      <MapIcon className="w-10 h-10" />
-      <span className="text-sm font-semibold">Bản đồ cửa hàng</span>
-    </div>
-  </div>
+          <div className="flex flex-col gap-3">
+            <h3 className="text-lg font-bold">Địa chỉ</h3>
+            <p className="text-sm font-semibold">📍 123/45/67 Q1, TP HCM</p>
+          </div>
 
-  {/* Copyright */}
-  <div className="w-full bg-[#FF7A00]/50 py-5 text-center">
-    <p className="text-sm font-semibold text-[#2B1B12]">
-      © 2026 TÊN CỬA HÀNG . Tất cả quyền được bảo lưu.
-    </p>
-  </div>
-</div>
+          {/* Map: Đẩy sang phải một chút nếu cần */}
+          <div className="w-full max-w-[280px] min-h-[140px] rounded-2xl bg-[#F3E7B9] border border-[#E1C96C] flex flex-col items-center justify-center gap-2 mx-auto">
+            <MapIcon className="w-10 h-10" />
+            <span className="text-sm font-semibold">Bản đồ cửa hàng</span>
+          </div>
+        </div>
+
+        {/* Copyright */}
+        <div className="w-full bg-[#F8E5C2]/50 py-5 text-center">
+          <p className="text-sm font-semibold text-[#2B1B12]">
+            © 2026 TÊN CỬA HÀNG . Tất cả quyền được bảo lưu.
+          </p>
+        </div>
+      </div>
     </footer>
   );
 }
