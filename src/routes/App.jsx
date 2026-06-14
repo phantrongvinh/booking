@@ -1,20 +1,27 @@
 import Auth from "@/pages/Auth";
+import Blog from "@/pages/Blog";
 import Home from "@/pages/Home";
-import Footer from "@/pages/layout/Footer";
-import Header from "@/pages/layout/Header";
+import MainLayout from "@/pages/layout/MainLayout";
 import Menu from "@/pages/Menu";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Notfound from "@/pages/Notfound";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 function App() {
   return (
     <BrowserRouter>
-      <Header></Header>
       <Routes>
-        <Route path="/" element={<Home />}></Route>
-        <Route path="/auth" element={<Auth />}></Route>
-        <Route path="/menu" element={<Menu />}></Route>
+        {/* Không dùng layout */}
+        <Route path="/auth" element={<Auth />} />
+
+        {/* Dùng layout */}
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/menu" element={<Menu />} />
+          <Route path="/blog" element={<Blog />} />
+        </Route>
+        {/* Route không tồn tại */}
+        <Route path="*" element={<Notfound />} />
       </Routes>
-      <Footer></Footer>
     </BrowserRouter>
   );
 }
