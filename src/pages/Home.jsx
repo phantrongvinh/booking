@@ -13,6 +13,7 @@ const Home = () => {
     name: "Tên bánh",
     description: "Mô tả món ăn",
     price: 200000,
+    status: "Bán chạy",
   }));
 
   const newProducts = Array.from({ length: 4 }, (_, i) => ({
@@ -22,7 +23,7 @@ const Home = () => {
     price: 200000,
   }));
 
-  const bgColor = "#FFFBF3";
+  const bgColor = "#FFF8E8";
 
   return (
     <div>
@@ -37,7 +38,7 @@ const Home = () => {
       <section className="relative z-10  bg-white">
         {/* Danh mục bánh  */}
         {/* Sử dụng thư việc SWIPER đẻ handle loop pagination của phần danh mục */}
-        <div className="py-20" style={{ backgroundColor: bgColor }}>
+        <div className="py-20">
           <Category></Category>
         </div>
 
@@ -64,15 +65,15 @@ const Home = () => {
         {/* BLog */}
         <div className="py-20 " style={{ backgroundColor: bgColor }}>
           <div className="container mx-auto">
-            <div className="text-4xl mb-10 text-center font-bold text-[#7A5C4E]">
+            <div className="text-4xl mb-10 text-center font-bold text-[#000000]">
               “Mỗi chiếc bánh không chỉ mang hương vị,
               <br />
               Mà còn lưu giữ những khoảnh khắc ngọt ngào.”
             </div>
             <div className="flex justify-center gap-4 w-[75%] mx-auto ">
-              <div className="w-[30%] rounded-3xl bg-[#F3D7A1] aspect-square"></div>
+              <div className="w-[30%] rounded-3xl border aspect-square"></div>
               <div className="w-[70%]">
-                <div className="text-md mb-8 leading-loose text-justify text-[#8A6852]">
+                <div className="text-md mb-8 leading-loose text-justify text-[#7A6A5C]">
                   Chỉ với vài nguyên liệu cơ bản như bột mì, trứng, sữa và một
                   chút kiên nhẫn, bạn đã có thể tạo nên những chiếc bánh thơm
                   mềm ngay tại căn bếp nhỏ của mình.Từ bánh bông lan, cookies
@@ -111,17 +112,20 @@ const Home = () => {
         </div>
 
         {/* Sale đăng ký */}
-        <div className="py-20 " style={{ backgroundColor: bgColor }}>
-          <div className="container mx-auto">
+        <div
+          className="py-20 container mx-auto rounded-4xl"
+          style={{ backgroundColor: bgColor }}
+        >
+          <div className=" mx-20 ">
             <div className="flex gap-4 ">
-              <div className="w-[50%] leading-loose flex flex-col gap-4 items-end justify-center">
-                <p className="text-5xl font-semibold text-[#6B4E41]">
+              <div className="w-[50%] leading-loose flex flex-col gap-4 items-start justify-center">
+                <p className="text-5xl font-semibold text-[#000000]">
                   Đăng ký thành viên
                 </p>
-                <p className="text-[#7A5C4E] text-4xl font-semibold">
+                <p className="text-[#FF7A00] text-4xl font-semibold">
                   để nhận ưu đãi
                 </p>
-                <p className="text-lg text-[#9C7B5B]">
+                <p className="text-lg text-[#7A6A5C]">
                   Đăng ký ngay để tích điểm và nhận ưu đãi sớm nhất.
                 </p>
                 <div className="">
@@ -140,10 +144,10 @@ const Home = () => {
             <div className="text-2xl font-bold text-center text-[#6B4E41] ">
               Ưu đãi & sự kiện
             </div>
-            <div className="mx-6 flex my-6">
-              <div className="w-[33%] bg-[#FFF8E8] aspect-[2/1] border border-[#F3D7A1]"></div>
-              <div className="w-[33%] bg-[#FFF8E8] aspect-[2/1] border border-[#F3D7A1]"></div>
-              <div className="w-[33%] bg-[#FFF8E8] aspect-[2/1] border border-[#F3D7A1]"></div>
+            <div className="flex my-6">
+              <div className="w-1/3 aspect-[2/1] border border-[#F3D7A1]"></div>
+              <div className="w-1/3 aspect-[2/1] border border-[#F3D7A1]"></div>
+              <div className="w-1/3 aspect-[2/1] border border-[#F3D7A1]"></div>
             </div>
             <div className="mb-6 text-center text-[#FF7A00] text-2xl font-bold">
               Xem tất cả ưu đãi & sự kiện

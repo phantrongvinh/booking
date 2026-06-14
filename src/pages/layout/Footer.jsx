@@ -71,7 +71,7 @@ export default function Footer() {
           className="absolute bottom-0 w-full h-6 z-20 pointer-events-none"
           style={{
             backgroundImage:
-              "radial-gradient(circle at 12px 24px, #C8A27A 12px, transparent 13px)",
+              "radial-gradient(circle at 12px 24px, #F7C75A 12px, transparent 13px)",
             backgroundSize: "24px 24px",
             backgroundRepeat: "repeat-x",
           }}
@@ -79,7 +79,7 @@ export default function Footer() {
       </div>
 
       {/* Thay đổi phần này vào code của bạn */}
-      <div className="bg-[#FFFBF3]">
+      <div className="bg-[#FFF3D6]">
         <div className="mx-auto px-10 pt-16 pb-16 grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto_1fr] gap-x-12 gap-y-8 text-[#2B1B12] ">
           {/* Cột 1: Logo, Slogan, Socials */}
           <div className="flex flex-col items-center text-center gap-3">
@@ -127,7 +127,7 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="w-full bg-[#F8E5C2]/50 py-5 text-center">
+        <div className="w-full bg-[#FF7A00]/50 py-5 text-center">
           <p className="text-sm font-semibold text-[#2B1B12]">
             © 2026 TÊN CỬA HÀNG . Tất cả quyền được bảo lưu.
           </p>
