@@ -1,5 +1,6 @@
 import Auth from "@/pages/Auth";
 import Blog from "@/pages/Blog";
+import BlogDetail from "@/pages/BlogDetail";
 import Home from "@/pages/Home";
 import MainLayout from "@/pages/layout/MainLayout";
 import Menu from "@/pages/Menu";
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogDetail />} />
         </Route>
         {/* Route không tồn tại */}
         <Route path="*" element={<Notfound />} />

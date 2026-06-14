@@ -6,6 +6,7 @@ const navItems = [
   { label: "Thực đơn", to: "/menu" },
   { label: "Mini Game", to: "/mini-game" },
   { label: "Tin tức", to: "/tin-tuc" },
+  { label: "Blog", to: "/blog" },
 ];
 
 export default function Header() {
