@@ -267,7 +267,7 @@ function LoginForm({ showPwd, setShowPwd }) {
           <input type="checkbox" className="accent-orange-500" />
           Lưu thông tin
         </label>
-        <a href="#" className="font-medium hover:text-[#FF7A00] transition-colors" style={{ color: "#7A6A5C" }}>Quên mật khẩu?</a>
+        <a href="/forgot-password" className="font-medium hover:text-[#FF7A00] transition-colors" style={{ color: "#7A6A5C" }}>Quên mật khẩu?</a>
       </div>
 
       <button
