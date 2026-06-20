@@ -2,10 +2,10 @@ import ButtonCustom from "@/components/ButtonCustom";
 import Category from "@/components/home/Category";
 import ProductList from "@/components/home/ProductList";
 import Slide from "@/components/home/Slide";
-import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import Blog from "./Blog";
-import { useState } from "react";
+import { useRef } from "react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation } from "swiper/modules";
 
 const Home = () => {
   const productList = Array.from({ length: 8 }, (_, i) => ({
@@ -16,12 +16,14 @@ const Home = () => {
     status: "Bán chạy",
   }));
 
-  const newProducts = Array.from({ length: 4 }, (_, i) => ({
+  const newProducts = Array.from({ length: 8 }, (_, i) => ({
     id: i + 1,
     name: "Tên bánh",
     description: "Mô tả món ăn",
     price: 200000,
   }));
+
+  const swiperRef = useRef(null);
 
   const bgColor = "#FFF8E8";
 
@@ -56,7 +58,9 @@ const Home = () => {
             </div>
             <div className="flex flex-wrap gap-4">
               {productList.map((value) => (
-                <ProductList data={value} key={value.id}></ProductList>
+                <div className="basis-[calc(25%-12px)] ">
+                  <ProductList data={value} key={value.id}></ProductList>
+                </div>
               ))}
             </div>
           </div>
@@ -84,7 +88,11 @@ const Home = () => {
                   chỉ nằm ở công thức, mà còn ở cảm xúc được gửi gắm trong đó.
                 </div>
                 <Link to="/blog">
-                  <ButtonCustom name="Xem thêm" size="lg"></ButtonCustom>
+                  <ButtonCustom
+                    name="Xem thêm"
+                    color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00]"
+                    size="xl"
+                  ></ButtonCustom>
                 </Link>
               </div>
             </div>
@@ -103,10 +111,40 @@ const Home = () => {
                 Xem tất cả
               </Link>
             </div>
-            <div className="flex flex-wrap gap-4">
-              {newProducts.map((value) => (
-                <ProductList data={value} key={value.id}></ProductList>
-              ))}
+            <div className="py-5">
+              <Swiper
+                modules={[Navigation]}
+                navigation
+                centeredSlides
+                loop={true}
+                onSwiper={(swiper) => {
+                  swiperRef.current = swiper;
+                }}
+                breakpoints={{
+                  640: {
+                    slidesPerView: 1,
+                  },
+                  768: {
+                    slidesPerView: 2,
+                  },
+                  1024: {
+                    slidesPerView: 3,
+                  },
+                  1440: {
+                    slidesPerView: 5,
+                  },
+                }}
+                className="h-full [--swiper-navigation-color:#000000]"
+              >
+                {newProducts.map((product, index) => (
+                  <SwiperSlide
+                    key={product.id}
+                    onClick={() => swiperRef.current?.slideToLoop(index)}
+                  >
+                    <ProductList data={product} />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
           </div>
         </div>
@@ -130,7 +168,11 @@ const Home = () => {
                 </p>
                 <div className="">
                   {/* Sử dụng Button Shadcn và custom button component */}
-                  <ButtonCustom size="1xl" name="Đăng ký ngay"></ButtonCustom>
+                  <ButtonCustom
+                    size="1xl"
+                    name="Đăng ký ngay"
+                    color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00]"
+                  ></ButtonCustom>
                 </div>
               </div>
               <div className="w-[50%] rounded-3xl bg-[#F3D7A1] aspect-[2/1]"></div>

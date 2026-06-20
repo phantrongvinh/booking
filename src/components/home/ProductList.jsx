@@ -5,7 +5,7 @@ import ButtonCustom from "../ButtonCustom";
 
 const ProductList = ({ data }) => {
   return (
-    <Card className="basis-[calc(25%-12px)] border border-[#FFF8E8] overflow-hidden rounded-2xl cursor-pointer hover:shadow-md transition">
+    <Card className="border border-[#FFF8E8] overflow-hidden rounded-2xl cursor-pointer hover:shadow-md transition">
       <CardHeader className="p-0 h-80 flex items-center justify-center relative ">
         {data.status && (
           <div className="bg-[#FFD21F] py-1 px-2 rounded-2xl absolute top-0 left-0 m-4">
@@ -28,7 +28,11 @@ const ProductList = ({ data }) => {
             {ulti.formatVND(data.price)}
           </span>
 
-          <ButtonCustom name="Mua" size="lg"></ButtonCustom>
+          <ButtonCustom
+            name="Mua"
+            size="lg"
+            color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00]"
+          ></ButtonCustom>
         </div>
       </CardContent>
     </Card>

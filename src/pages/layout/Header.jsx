@@ -67,9 +67,12 @@ export default function Header() {
                 <button className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors">
                   <ShoppingBag size={20} />
                 </button>
-                <button className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors">
+                <Link
+                  to="/account"
+                  className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors"
+                >
                   <User size={20} />
-                </button>
+                </Link>
               </div>
             </div>
           </div>

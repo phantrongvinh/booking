@@ -1,11 +1,12 @@
 import { Button } from "./ui/button";
 
-const ButtonCustom = ({ name, size }) => {
+const ButtonCustom = ({ name, size, color, ...props }) => {
   return (
     <Button
       size={size}
-      className="border-[#FF7A00] py-4 px-6 cursor-pointer text-[#FF7A00] hover:bg-[#FF7A00]
-    hover:text-white "
+      className={`${color} py-4 px-6 cursor-pointer 
+    hover:text-white `}
+      {...props}
     >
       {name}
     </Button>
