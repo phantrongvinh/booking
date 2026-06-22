@@ -1,45 +1,48 @@
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
 
 const ProductCard = ({ product }) => {
   return (
-    <Card className="w-full max-w-75.5 rounded-[24px] border border-black  bg-[#d9d9d9] overflow-hidden p-0">
-      <div className="h-47.5 w-full bg-[#6f4e4e] rounded-[23px] border border-black">
-        {product.image && (
-          <img
-            src={product.image}
-            alt={product.name}
-            className="h-full w-full object-cover"
-          />
-        )}
-      </div>
+    <Link to={`/menu/${product.slug}`} className="block w-full">
+      <Card className="w-full overflow-hidden rounded-[24px] border border-black bg-[#d9d9d9] hover:shadow-md transition cursor-pointer">
+        <CardHeader className="p-0">
+          <div className="aspect-square w-full bg-[#6f4e4e] border-b border-black">
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="h-full w-full object-cover"
+            />
+          </div>
+        </CardHeader>
 
-      <div className="h-24.75 px-4 py-3 flex flex-col justify-between">
-        <h3 className="font-bold text-[16px] leading-tight">{product.name}</h3>
+        <CardContent className="p-4">
+          <h3 className="font-bold text-base line-clamp-2 min-h-12">
+            {product.name}
+          </h3>
 
-        <div className="flex items-center justify-between">
-          <div className="flex items-center justify-between">
-            <span className="font-bold text-[16px]">
-              {(product.price / 1000).toLocaleString("vi-VN")}k
+          <div className="mt-3 flex items-center justify-between">
+            <span className="font-bold text-lg text-orange-500">
+              {product.price.toLocaleString("vi-VN")}đ
             </span>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Button className="bg-[#FF3A3A] hover:bg-red-600 text-white font-bold text-[12px] w-25 h-6.75 rounded-full border border-black shadow-none">
-              Đặt ngay
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button className="bg-[#FF3A3A] hover:bg-red-600 text-white rounded-full border border-black">
+                Đặt ngay
+              </Button>
 
-            <Button
-              size="icon"
-              className="bg-[#AEFF00] hover:bg-[#9be500] text-black w-12.5 h-12.5 rounded-full border border-black shadow-none"
-            >
-              <ShoppingCart size={22} strokeWidth={2.5} />
-            </Button>
+              <Button
+                size="icon"
+                className="bg-[#AEFF00] hover:bg-[#9be500] text-black rounded-full border border-black"
+              >
+                <ShoppingCart size={20} />
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
-    </Card>
+        </CardContent>
+      </Card>
+    </Link>
   );
 };
 
