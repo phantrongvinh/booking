@@ -4,6 +4,7 @@ import BlogDetail from "@/pages/BlogDetail";
 import Home from "@/pages/Home";
 import MainLayout from "@/pages/layout/MainLayout";
 import Menu from "@/pages/Menu";
+import ProductDetail from "@/pages/ProductDetail";
 import Notfound from "@/pages/Notfound";
 import ForgotPassword from "@/pages/ForgotPassword";
 import VerifyOtp from "@/pages/VerifyOtp";
@@ -29,6 +30,7 @@ function App() {
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/menu/:slug" element={<ProductDetail />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/profile" element={<Profile />} />

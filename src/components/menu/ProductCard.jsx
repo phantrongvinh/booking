@@ -5,17 +5,15 @@ import { ShoppingCart } from "lucide-react";
 
 const ProductCard = ({ product }) => {
   return (
-    <Link to={`/blog/${product.slug}`}>
-      <Card className="w-100 max-w-75.5 overflow-hidden rounded-[24px] border border-black bg-[#d9d9d9] hover:shadow-md transition cursor-pointer">
+    <Link to={`/menu/${product.slug}`} className="block w-full">
+      <Card className="w-full overflow-hidden rounded-[24px] border border-black bg-[#d9d9d9] hover:shadow-md transition cursor-pointer">
         <CardHeader className="p-0">
           <div className="aspect-square w-full bg-[#6f4e4e] border-b border-black">
-            {product.image && (
-              <img
-                src={product.image}
-                alt={product.name}
-                className="h-full w-full object-cover"
-              />
-            )}
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="h-full w-full object-cover"
+            />
           </div>
         </CardHeader>
 
@@ -25,8 +23,8 @@ const ProductCard = ({ product }) => {
           </h3>
 
           <div className="mt-3 flex items-center justify-between">
-            <span className="font-bold text-lg">
-              {(product.price / 1000).toLocaleString("vi-VN")}k
+            <span className="font-bold text-lg text-orange-500">
+              {product.price.toLocaleString("vi-VN")}đ
             </span>
 
             <div className="flex items-center gap-2">
