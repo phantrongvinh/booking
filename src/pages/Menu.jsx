@@ -52,17 +52,14 @@ const Menu = () => {
           <h2 className="text-xl font-bold ml-3">Trang chủ &gt; Thực đơn</h2>
 
           <Select onValueChange={setSortBy}>
-            <SelectTrigger className="w-45 rounded-full border border-[#D4C4A8] bg-[#FFF8EA]">
+            <SelectTrigger className="w-45 h-10 rounded-full border border-[#D4C4A8] bg-[#FFF8EA]">
               <SelectValue placeholder="Lọc theo: giá" />
             </SelectTrigger>
 
-            <SelectContent>
+            <SelectContent className="z-50 bg-white" position="popper">
               <SelectItem value="price-asc">Giá tăng dần</SelectItem>
-
               <SelectItem value="price-desc">Giá giảm dần</SelectItem>
-
               <SelectItem value="name-asc">Tên A → Z</SelectItem>
-
               <SelectItem value="name-desc">Tên Z → A</SelectItem>
             </SelectContent>
           </Select>
