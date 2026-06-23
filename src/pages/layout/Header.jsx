@@ -64,9 +64,11 @@ export default function Header() {
               </div>
 
               <div className="flex items-center gap-3">
-                <button className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors">
-                  <ShoppingBag size={20} />
-                </button>
+                <Link to="/cart">
+                  <button className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors">
+                    <ShoppingBag size={20} />
+                  </button>
+                </Link>
                 <Link
                   to="/account"
                   className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors"

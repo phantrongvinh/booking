@@ -15,6 +15,8 @@ import AccountLayout from "@/pages/layout/AccountLayout";
 import Notification from "@/components/account/Notificaton";
 import Order from "@/components/account/Order";
 import Addresses from "@/components/account/Addresses";
+import Cart from "@/pages/Cart";
+import Checkout from "@/pages/Checkout";
 
 function App() {
   return (
@@ -34,6 +36,8 @@ function App() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/checkout" element={<Checkout />} />
 
           {/* Account route layout */}
           <Route path="/account" element={<AccountLayout />}>
