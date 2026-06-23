@@ -6,6 +6,7 @@ const CartSummary = ({
   voucher,
   setVoucher,
   voucherList = [],
+  onCheckout,
 }) => {
   return (
     <div className="w-full max-w-sm select-none">
@@ -79,7 +80,10 @@ const CartSummary = ({
       </div>
 
       {/* Nút Thanh toán ngay */}
-      <button className="w-full mt-4 py-4 rounded-[30px] bg-[#F4C45F] text-black font-bold text-lg shadow-sm transition hover:bg-[#e0b250]">
+      <button
+        onClick={onCheckout}
+        className="w-full mt-4 py-4 rounded-[30px] bg-[#F4C45F] text-black font-bold text-lg shadow-sm transition hover:bg-[#e0b250]"
+      >
         Thanh toán ngay
       </button>
     </div>

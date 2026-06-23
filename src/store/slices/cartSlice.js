@@ -2,14 +2,18 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   cartItems: [],
+  selectedVoucher: null,
+  shippingFee: 10000,
 };
 
 const cartSlice = createSlice({
   name: "cart",
   initialState,
+
   reducers: {
     addToCart: (state, action) => {
       const product = action.payload;
+
       const existing = state.cartItems.find(
         (item) => item.product_id === product.product_id,
       );
@@ -50,8 +54,10 @@ const cartSlice = createSlice({
         );
       }
     },
+
     toggleSelected: (state, action) => {
       const item = state.cartItems.find((i) => i.product_id === action.payload);
+
       if (item) item.selected = !item.selected;
     },
 
@@ -61,6 +67,14 @@ const cartSlice = createSlice({
       state.cartItems.forEach((item) => {
         item.selected = !allSelected;
       });
+    },
+
+    setVoucher: (state, action) => {
+      state.selectedVoucher = action.payload;
+    },
+
+    setShippingFee: (state, action) => {
+      state.shippingFee = action.payload;
     },
   },
 });
@@ -72,6 +86,8 @@ export const {
   decreaseQty,
   toggleSelected,
   toggleSelectAll,
+  setVoucher,
+  setShippingFee,
 } = cartSlice.actions;
 
 export default cartSlice.reducer;

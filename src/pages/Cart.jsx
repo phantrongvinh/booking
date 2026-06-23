@@ -1,4 +1,5 @@
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
@@ -12,16 +13,18 @@ import {
   removeFromCart,
   toggleSelected,
   toggleSelectAll,
+  setVoucher,
 } from "@/store/slices/cartSlice";
-
-import { useState } from "react";
 
 const Cart = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const cartItems = useSelector((state) => state.cart.cartItems);
 
-  const [selectedVoucher, setSelectedVoucher] = useState(null);
+  const selectedVoucher = useSelector((state) => state.cart.selectedVoucher);
+
+  const shippingFee = useSelector((state) => state.cart.shippingFee);
 
   // chọn tất cả
   const allSelected =
@@ -34,10 +37,28 @@ const Cart = () => {
     0,
   );
 
-  const shippingFee = 10000;
   const discount = selectedVoucher?.discount || 0;
 
   const total = subtotal + shippingFee - discount;
+
+  const handleVoucherChange = (voucher) => {
+    dispatch(setVoucher(voucher));
+  };
+
+  const handleCheckout = () => {
+    if (selectedItems.length === 0) {
+      alert("Vui lòng chọn ít nhất 1 sản phẩm");
+      return;
+    }
+
+    navigate("/checkout");
+  };
+  console.log({
+    subtotal,
+    shippingFee,
+    discount,
+    total,
+  });
 
   return (
     <div className="container mx-auto py-10">
@@ -77,8 +98,9 @@ const Cart = () => {
           discount={discount}
           total={total}
           voucher={selectedVoucher}
-          setVoucher={setSelectedVoucher}
+          setVoucher={handleVoucherChange}
           voucherList={voucherList}
+          onCheckout={handleCheckout}
         />
       </div>
 
