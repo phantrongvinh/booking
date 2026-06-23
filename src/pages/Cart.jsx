@@ -28,11 +28,11 @@ const Cart = () => {
 
   // chọn tất cả
   const allSelected =
-    cartItems.length > 0 && cartItems.every((item) => item.selected);
+    cartItems?.length > 0 && cartItems?.every((item) => item.selected);
 
-  const selectedItems = cartItems.filter((item) => item.selected);
+  const selectedItems = cartItems?.filter((item) => item.selected);
 
-  const subtotal = selectedItems.reduce(
+  const subtotal = selectedItems?.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -46,7 +46,7 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    if (selectedItems.length === 0) {
+    if (selectedItems?.length === 0) {
       alert("Vui lòng chọn ít nhất 1 sản phẩm");
       return;
     }
@@ -74,11 +74,11 @@ const Cart = () => {
               onChange={() => dispatch(toggleSelectAll())}
             />
 
-            <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
+            <span>Chọn tất cả ({cartItems?.length} sản phẩm)</span>
           </div>
 
           <div className="space-y-4">
-            {cartItems.map((item) => (
+            {cartItems?.map((item) => (
               <CartItem
                 key={item.product_id}
                 item={item}

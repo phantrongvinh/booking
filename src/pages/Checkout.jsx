@@ -11,9 +11,9 @@ const Checkout = () => {
 
   const shippingFee = useSelector((state) => state.cart.shippingFee);
 
-  const selectedItems = cartItems.filter((item) => item.selected);
+  const selectedItems = cartItems?.filter((item) => item.selected);
 
-  const subtotal = selectedItems.reduce(
+  const subtotal = selectedItems?.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
