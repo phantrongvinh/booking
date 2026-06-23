@@ -1,3 +1,5 @@
+import ulti from "@/ultis/ulti";
+
 const OrderSummary = ({
   items,
   subtotal,
@@ -12,7 +14,7 @@ const OrderSummary = ({
         <h2 className="mb-6 text-2xl font-bold">Chi tiết đơn hàng</h2>
 
         <div className="space-y-4">
-          {items.map((item) => (
+          {items?.map((item) => (
             <div key={item.product_id} className="flex gap-3">
               <img
                 src={item.product_image}
@@ -27,7 +29,7 @@ const OrderSummary = ({
                   <span>Số lượng: x{item.quantity}</span>
 
                   <span className="font-semibold text-[#FF9922]">
-                    {(item.price * item.quantity).toLocaleString()}đ
+                    {ulti.formatVND(item.price * item.quantity)}
                   </span>
                 </div>
               </div>
@@ -40,7 +42,7 @@ const OrderSummary = ({
             <span className="font-medium text-gray-800">Tạm tính</span>
 
             <span className="text-xl text-[#FF9922]">
-              {subtotal.toLocaleString()}đ
+              {ulti.formatVND(subtotal)}
             </span>
           </div>
 
@@ -48,7 +50,7 @@ const OrderSummary = ({
             <span className="font-medium text-gray-800">Mã giảm</span>
 
             <span className="text-xl text-[#FF9922]">
-              -{discount.toLocaleString()}đ
+              -{ulti.formatVND(discount)}
             </span>
           </div>
 
@@ -56,7 +58,7 @@ const OrderSummary = ({
             <span className="font-medium text-gray-800">Phí giao hàng</span>
 
             <span className="text-xl text-[#FF9922]">
-              {shippingFee.toLocaleString()}đ
+              {ulti.formatVND(shippingFee)}
             </span>
           </div>
         </div>
@@ -65,7 +67,7 @@ const OrderSummary = ({
           <span className="text-lg font-bold">Tổng cộng</span>
 
           <span className="text-3xl font-bold text-[#FF9922]">
-            {total.toLocaleString()}đ
+            {ulti.formatVND(total)}
           </span>
         </div>
       </div>

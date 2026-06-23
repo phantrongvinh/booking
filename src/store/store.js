@@ -5,8 +5,21 @@ import cartReducer from "./slices/cartSlice";
 const loadCart = () => {
   try {
     const data = localStorage.getItem("cart");
-    return data ? JSON.parse(data) : undefined;
-  } catch (err) {
+
+    if (!data) return undefined;
+
+    const parsed = JSON.parse(data);
+
+    if (parsed && Array.isArray(parsed.cartItems)) {
+      return parsed;
+    }
+
+    return {
+      cartItems: [],
+      selectedVoucher: null,
+      shippingFee: 10000,
+    };
+  } catch {
     return undefined;
   }
 };
