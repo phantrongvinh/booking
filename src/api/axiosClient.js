@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "",
+  baseURL: "https://bookingbakery.onrender.com/api",
   timeout: 5000,
   responseType: "json",
   headers: {
