@@ -17,6 +17,7 @@ import Order from "@/components/account/Order";
 import Addresses from "@/components/account/Addresses";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
+import { PrivateRoute, PublicOnlyRoute } from "./ProtectedRoute";
 
 function App() {
   return (
@@ -24,8 +25,22 @@ function App() {
       <ScrollToTop />
       <Routes>
         {/* Không dùng layout */}
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route
+          path="/auth"
+          element={
+            <PublicOnlyRoute>
+              <Auth />
+            </PublicOnlyRoute>
+          }
+        />
+        <Route
+          path="/forgot-password"
+          element={
+            <PublicOnlyRoute>
+              <ForgotPassword />
+            </PublicOnlyRoute>
+          }
+        />
         <Route path="/verify-otp" element={<VerifyOtp />} />
 
         {/* Dùng layout */}
@@ -40,7 +55,14 @@ function App() {
           <Route path="/checkout" element={<Checkout />} />
 
           {/* Account route layout */}
-          <Route path="/account" element={<AccountLayout />}>
+          <Route
+            path="/account"
+            element={
+              <PrivateRoute>
+                <AccountLayout />
+              </PrivateRoute>
+            }
+          >
             <Route index element={<Navigate to="profile" replace />} />
             <Route path="profile" element={<Profile />} />
             <Route path="notification" element={<Notification />} />

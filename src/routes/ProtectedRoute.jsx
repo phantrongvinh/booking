@@ -1,10 +1,17 @@
 import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
-const ProtectedRoute = ({ child }) => {
+export const PublicOnlyRoute = ({ children }) => {
   const { isLoggedIn } = useSelector((state) => state.auth);
+  console.log(isLoggedIn);
 
-  return isLoggedIn ? child : <Navigate to="/" />;
+  if (isLoggedIn) return <Navigate to="/" replace />;
+  return children;
 };
 
-export default ProtectedRoute;
+export const PrivateRoute = ({ children, roles }) => {
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
+  if (!isLoggedIn) return <Navigate to="/auth" replace />;
+  if (roles && !roles.includes(user?.role)) return <Navigate to="/" replace />;
+  return children;
+};

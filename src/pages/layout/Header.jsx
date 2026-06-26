@@ -1,5 +1,8 @@
-import { Search, ShoppingBag, User } from "lucide-react";
-import { Link } from "react-router-dom";
+import { logout } from "@/store/slices/authSlice";
+import { LogOut, Search, ShoppingBag, User } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
 const navItems = [
   { label: "Trang chủ", to: "/" },
@@ -10,6 +13,27 @@ const navItems = [
 ];
 
 export default function Header() {
+  const { isLoggedIn, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+
+  // Click outside để đóng dropdown
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setOpen(false);
+    navigate("/");
+  };
+
   return (
     <>
       <div className="py-1 bg-[#FFC13B]">
@@ -69,12 +93,57 @@ export default function Header() {
                     <ShoppingBag size={20} />
                   </button>
                 </Link>
-                <Link
-                  to="/account"
-                  className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors"
-                >
-                  <User size={20} />
-                </Link>
+
+                {!isLoggedIn ? (
+                  <Link
+                    to="/auth"
+                    className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors"
+                  >
+                    <User size={20} />
+                  </Link>
+                ) : (
+                  <div className="relative" ref={ref}>
+                    <button
+                      onClick={() => setOpen((v) => !v)}
+                      className="w-10 h-10 rounded-full flex items-center justify-center border border-[#2B1B12] text-[#2B1B12] hover:bg-[#FFC13B]/30 transition-colors"
+                    >
+                      <User size={20} />
+                    </button>
+
+                    {open && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                        {/* Tên user */}
+                        <div className="px-4 py-2 border-b border-gray-100">
+                          <p className="text-sm font-semibold text-[#2B1B12] truncate">
+                            {user?.username}
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            {user?.email}
+                          </p>
+                        </div>
+
+                        {/* Hồ sơ cá nhân */}
+                        <Link
+                          to="/account/profile"
+                          onClick={() => setOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2 text-sm text-[#2B1B12] hover:bg-[#FFC13B]/20 transition-colors"
+                        >
+                          <User size={16} />
+                          Hồ sơ cá nhân
+                        </Link>
+
+                        {/* Đăng xuất */}
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                        >
+                          <LogOut size={16} />
+                          Đăng xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </div>

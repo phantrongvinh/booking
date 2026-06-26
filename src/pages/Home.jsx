@@ -81,11 +81,13 @@ const Home = () => {
             </div>
             <div className="flex flex-wrap gap-4">
               {loading ? (
-                <div className="mx-auto py-4">Đang tải dữ liệu sản phẩm...</div>
+                <div className="mx-auto py-4" key={0}>
+                  Đang tải dữ liệu sản phẩm...
+                </div>
               ) : (
                 productBestSale.map((value) => (
-                  <div className="basis-[calc(25%-12px)] " key={value.id}>
-                    <ProductList data={value}></ProductList>
+                  <div className="basis-[calc(25%-12px)]" key={value.id}>
+                    <ProductList data={value} key={value.id}></ProductList>
                   </div>
                 ))
               )}
