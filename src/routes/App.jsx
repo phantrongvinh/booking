@@ -18,6 +18,9 @@ import Addresses from "@/components/account/Addresses";
 import Cart from "@/pages/Cart";
 import Checkout from "@/pages/Checkout";
 import { PrivateRoute, PublicOnlyRoute } from "./ProtectedRoute";
+import MyVoucher from "@/components/account/MyVoucher";
+import StaffLayout from "@/pages/layout/StaffLayout";
+import StaffHome from "@/pages/StaffHome";
 
 function App() {
   return (
@@ -68,10 +71,23 @@ function App() {
             <Route path="notification" element={<Notification />} />
             <Route path="orders" element={<Order />} />
             <Route path="address" element={<Addresses />} />
+            <Route path="voucher" element={<MyVoucher />} />
 
             {/*<Route path="favorites" element={<Favorites />} />
             <Route path="change-password" element={<ChangePassword />} />  */}
           </Route>
+        </Route>
+
+        <Route
+          path="/staff/*"
+          element={
+            <PrivateRoute roles={["STAFF"]}>
+              <StaffLayout />
+            </PrivateRoute>
+          }
+        >
+          <Route index element={<StaffHome />} />
+          {/* <Route path="orders" element={<StaffOrders />} /> */}
         </Route>
         {/* Route không tồn tại */}
         <Route path="*" element={<Notfound />} />

@@ -301,15 +301,17 @@ function LoginForm({ showPwd, setShowPwd }) {
 
   // hanleLogin
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  const { user, token, loading, error } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      await dispatch(login(formData)).unwrap();
-      navigate("/");
+      const res = await dispatch(login(formData)).unwrap();
+
+      if (res.roleId === 1) navigate("/");
+      else if (res.roleId === 2) navigate("/staff");
+      else navigate("/");
     }
   };
 

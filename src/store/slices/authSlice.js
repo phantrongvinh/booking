@@ -1,13 +1,13 @@
 import authAPI from "@/api/authAPI";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { useNavigate } from "react-router-dom";
 
 export const login = createAsyncThunk(
   "login",
-  async (data, { rejectWithValue }) => {
+  async (form, { rejectWithValue }) => {
     try {
-      const res = await authAPI.login(data);
-
-      return res.data;
+      const res = await authAPI.login(form);
+      return res;
     } catch (error) {
       return rejectWithValue("Đăng nhập thất bại");
     }
@@ -21,13 +21,15 @@ export const login = createAsyncThunk(
 
 //   }
 // })
+const savedUser = JSON.parse(localStorage.getItem("user")) || null;
 
 const authSlice = createSlice({
   name: "auth",
   initialState: {
     user: JSON.parse(localStorage.getItem("user")) || null,
     isLoggedIn: !!localStorage.getItem("token"),
-    isAdmin: false,
+    isAdmin: savedUser?.role === "ADMIN",
+    isStaff: savedUser?.role === "STAFF",
     token: localStorage.getItem("token") || null,
     loading: false,
     error: null,
@@ -60,9 +62,11 @@ const authSlice = createSlice({
                 ? "STAFF"
                 : "CUSTOMER",
         };
-        state.isLoggedIn = true;
+        state.isLoggedIn = !!localStorage.getItem("token");
         localStorage.setItem("token", action.payload.token);
         localStorage.setItem("user", JSON.stringify(state.user));
+        state.isAdmin = state.user.role === "ADMIN";
+        state.isStaff = state.user.role === "STAFF";
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;

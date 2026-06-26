@@ -3,8 +3,6 @@ import { Navigate } from "react-router-dom";
 
 export const PublicOnlyRoute = ({ children }) => {
   const { isLoggedIn } = useSelector((state) => state.auth);
-  console.log(isLoggedIn);
-
   if (isLoggedIn) return <Navigate to="/" replace />;
   return children;
 };

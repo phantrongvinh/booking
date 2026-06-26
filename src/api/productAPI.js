@@ -13,14 +13,12 @@ const fetchProductById = async (id) => {
 };
 
 const fetchProductByCategory = async (categoryId) => {
-  const { data } = await axiosClient.get(
-    `/Products/category/${categoryId}`
-  );
+  const { data } = await axiosClient.get(`/Products/category/${categoryId}`);
   return data;
 };
 
 const productAPI = {
-  fetchAllProduct,
+  fetchProduct,
   fetchProductById,
   fetchProductByCategory,
 };
