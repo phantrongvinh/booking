@@ -1,14 +1,19 @@
-import categories from "@/mockData/categories";
+import { useState } from "react";
 
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Menu, Star, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 
-const SidebarFilter = ({ selectedCategory, setSelectedCategory }) => {
+import { Menu, Star, ChevronDown } from "lucide-react";
+
+const SidebarFilter = ({
+  categories,
+  selectedCategory,
+  onCategoryChange,
+}) => {
   const [showAllCategories, setShowAllCategories] = useState(false);
+
   return (
     <Card className="w-65 h-fit self-start rounded-[32px] bg-[#F9F8F6] px-6 py-6">
       {/* Thực đơn */}
@@ -23,7 +28,7 @@ const SidebarFilter = ({ selectedCategory, setSelectedCategory }) => {
           <div className="flex items-center gap-2">
             <Checkbox
               checked={selectedCategory === null}
-              onCheckedChange={() => setSelectedCategory(null)}
+              onCheckedChange={() => onCategoryChange(null)}
             />
 
             <label className="font-medium cursor-pointer">Tất cả</label>
@@ -31,10 +36,10 @@ const SidebarFilter = ({ selectedCategory, setSelectedCategory }) => {
 
           {(showAllCategories ? categories : categories.slice(0, 5)).map(
             (item) => (
-              <div key={item.category_id} className="flex items-center gap-2">
+              <div key={item.categoryId} className="flex items-center gap-2">
                 <Checkbox
-                  checked={selectedCategory === item.category_id}
-                  onCheckedChange={() => setSelectedCategory(item.category_id)}
+                  checked={selectedCategory === item.categoryId}
+                  onCheckedChange={() => onCategoryChange(item.categoryId)}
                 />
 
                 <label className="font-medium cursor-pointer">

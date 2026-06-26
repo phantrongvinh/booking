@@ -3,75 +3,32 @@ import { createSlice } from "@reduxjs/toolkit";
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
-    cartItems: [],
+    selectedProducts: [],
     selectedVoucher: null,
     shippingFee: 10000,
   },
 
   reducers: {
-    addToCart: (state, action) => {
-      const product = action.payload;
-
-      const existing = state.cartItems?.find(
-        (item) => Number(item.product_id) === Number(product.product_id),
-      );
-
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        state.cartItems.push({
-          ...product,
-          quantity: 1,
-          selected: true,
-        });
-        console.log(state.cartItems);
-      }
-    },
-
-    removeFromCart: (state, action) => {
-      state.cartItems = state.cartItems?.filter(
-        (item) => item.product_id !== action.payload,
-      );
-    },
-
-    increaseQty: (state, action) => {
-      const item = state.cartItems?.find(
-        (i) => i.product_id === action.payload,
-      );
-
-      if (item) item.quantity += 1;
-    },
-
-    decreaseQty: (state, action) => {
-      const item = state.cartItems?.find(
-        (i) => i.product_id === action.payload,
-      );
-
-      if (!item) return;
-
-      item.quantity -= 1;
-
-      if (item.quantity <= 0) {
-        state.cartItems = state.cartItems?.filter(
-          (i) => i.product_id !== action.payload,
-        );
-      }
-    },
-
     toggleSelected: (state, action) => {
-      const item = state.cartItems?.find(
-        (i) => i.product_id === action.payload,
-      );
+      const productId = action.payload;
 
-      if (item) item.selected = !item.selected;
+      if (state.selectedProducts.includes(productId)) {
+        state.selectedProducts = state.selectedProducts.filter(
+          (id) => id !== productId,
+        );
+      } else {
+        state.selectedProducts.push(productId);
+      }
     },
 
-    toggleSelectAll: (state) => {
-      const allSelected = state.cartItems?.every((i) => i.selected);
+    toggleSelectAll: (state, action) => {
+      const productIds = action.payload;
 
-      state.cartItems?.forEach((item) => {
-        item.selected = !allSelected;
-      });
+      if (state.selectedProducts.length === productIds.length) {
+        state.selectedProducts = [];
+      } else {
+        state.selectedProducts = [...productIds];
+      }
     },
 
     setVoucher: (state, action) => {
@@ -84,15 +41,7 @@ const cartSlice = createSlice({
   },
 });
 
-export const {
-  addToCart,
-  removeFromCart,
-  increaseQty,
-  decreaseQty,
-  toggleSelected,
-  toggleSelectAll,
-  setVoucher,
-  setShippingFee,
-} = cartSlice.actions;
+export const { toggleSelected, toggleSelectAll, setVoucher, setShippingFee } =
+  cartSlice.actions;
 
 export default cartSlice.reducer;

@@ -1,41 +1,75 @@
+import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import products from "@/mockData/products";
-import categories from "@/mockData/categories";
+import productAPI from "@/api/productAPI";
 
 import ProductGallery from "@/components/product-detail/ProductGallery";
 import ProductInfo from "@/components/product-detail/ProductInfo";
 import RelatedProducts from "@/components/product-detail/RelatedProducts";
 
 const ProductDetail = () => {
-  const { slug } = useParams();
+  const { productId } = useParams();
 
-  const product = products.find((item) => item.slug === slug);
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  if (!product) {
-    return <div className="py-20 text-center">Không tìm thấy sản phẩm</div>;
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+
+        const data = await productAPI.fetchProductById(productId);
+
+        setProduct(data || null);
+      } catch (error) {
+        console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
+        setProduct(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (productId) {
+      loadProduct();
+    }
+  }, [productId]);
+
+  // ================= LOADING =================
+  if (loading) {
+    return (
+      <div className="py-20 text-center text-gray-500">
+        ⏳ Đang tải sản phẩm...
+      </div>
+    );
   }
 
-  const category = categories.find(
-    (item) => item.category_id === product.category_id,
-  );
+  // ================= NOT FOUND =================
+  if (!product) {
+    return (
+      <div className="py-20 text-center text-gray-500">
+        Không tìm thấy sản phẩm
+      </div>
+    );
+  }
 
   return (
     <div className="w-full flex justify-center">
       <div className="w-full max-w-360 mx-auto px-4 py-6">
-        {/* Breadcrumb */}
+        {/* BREADCRUMB */}
         <div className="mb-6 text-sm font-semibold">
-          Trang chủ &gt; Thực đơn &gt; {category?.name} &gt; {product.name}
+          <h3 className="text-base font-bold ml-3">
+            Trang chủ &gt; Thực đơn &gt; {product.categoryName} &gt;{" "}
+            {product.name}
+          </h3>
         </div>
 
-        {/* Main Content */}
+        {/* MAIN */}
         <div className="grid lg:grid-cols-[2fr_1fr] gap-8">
           <ProductGallery product={product} />
-
           <ProductInfo product={product} />
         </div>
 
-        {/* Related Products */}
+        {/* RELATED */}
         <RelatedProducts currentProduct={product} />
       </div>
     </div>

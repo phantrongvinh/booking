@@ -2,13 +2,11 @@ import axiosClient from "./axiosClient";
 
 const url = "/Categories";
 
-const fetchAllCategory = async () => {
-  const res = await axiosClient.get(`${url}`);
-  return res;
+const fetchCategory = async () => {
+  const { data } = await axiosClient.get(url);
+  return data;
 };
 
-const categoryAPI = {
-  fetchAllCategory,
-};
-
-export default categoryAPI;
+export default {
+  fetchCategory,
+};  
