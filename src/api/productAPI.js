@@ -20,7 +20,7 @@ const fetchProductByCategory = async (categoryId) => {
 };
 
 const productAPI = {
-  fetchProduct,
+  fetchAllProduct,
   fetchProductById,
   fetchProductByCategory,
 };

@@ -3,26 +3,49 @@ import Category from "@/components/home/Category";
 import ProductList from "@/components/home/ProductList";
 import Slide from "@/components/home/Slide";
 import { Link } from "react-router-dom";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
+import { useFetch } from "@/hook/customHook";
+import { useDispatch } from "react-redux";
+import { fetchAllProduct } from "@/store/slices/productSlice";
+import ulti from "@/ultis/ulti";
 
 const Home = () => {
-  const productList = Array.from({ length: 8 }, (_, i) => ({
-    id: i + 1,
-    name: "Tên bánh",
-    description: "Mô tả món ăn",
-    price: 200000,
-    status: "Bán chạy",
-  }));
+  // fetch products best seller, newest
+  const dispatch = useDispatch();
 
-  const newProducts = Array.from({ length: 8 }, (_, i) => ({
-    id: i + 1,
-    name: "Tên bánh",
-    description: "Mô tả món ăn",
-    price: 200000,
-  }));
+  const {
+    data: { products },
+    loading,
+  } = useFetch(
+    async () => {
+      const products = await dispatch(fetchAllProduct()).unwrap();
+      return { products };
+    },
+    { initialData: { products: [] } },
+  );
 
+  // best seller
+  const productBestSale = [...products]
+    // .sort((a, b) => b.soldQuantity - a.soldQuantity)
+    .slice(0, 8)
+    .map((item) => ({
+      ...item,
+      isHot: item.soldQuantity > 100,
+      label: "Bán chạy",
+      slug: ulti.slugify(item.name),
+    }));
+
+  const newProducts = [...products]
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 8)
+    .map((item) => ({
+      ...item,
+      slug: ulti.slugify(item.name),
+    }));
+
+  // handle swipper
   const swiperRef = useRef(null);
 
   const bgColor = "#FFF8E8";
@@ -57,11 +80,17 @@ const Home = () => {
               </Link>
             </div>
             <div className="flex flex-wrap gap-4">
-              {productList.map((value) => (
-                <div className="basis-[calc(25%-12px)] ">
-                  <ProductList data={value} key={value.id}></ProductList>
+              {loading ? (
+                <div className="mx-auto py-4" key={0}>
+                  Đang tải dữ liệu sản phẩm...
                 </div>
-              ))}
+              ) : (
+                productBestSale.map((value) => (
+                  <div className="basis-[calc(25%-12px)]" key={value.id}>
+                    <ProductList data={value} key={value.id}></ProductList>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>

@@ -2,8 +2,8 @@ import axiosClient from "./axiosClient";
 
 const url = "/Auth";
 
-const login = async () => {
-  const res = await axiosClient.post(`${url}/login`);
+const login = async (data) => {
+  const res = await axiosClient.post(`${url}/login`, data);
   return res;
 };
 
