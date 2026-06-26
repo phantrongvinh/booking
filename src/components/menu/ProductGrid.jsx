@@ -10,7 +10,7 @@ const ProductGrid = ({ products }) => {
     <div className="flex flex-col items-center w-full gap-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6.25 w-full">
         {visibleProducts.map((item) => (
-          <ProductCard key={item.product_id} product={item} />
+          <ProductCard key={item.productId} product={item} />
         ))}
       </div>
 

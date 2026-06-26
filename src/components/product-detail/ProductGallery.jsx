@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const ProductGallery = ({ product }) => {
-  const images =
-    product.images?.length > 0 ? product.images : [product.image_url];
+  // Hiện tại API chỉ trả về 1 ảnh
+  const images = [product.imageUrl];
 
   const [currentImage, setCurrentImage] = useState(0);
 
@@ -34,6 +34,7 @@ const ProductGallery = ({ product }) => {
           variant="outline"
           onClick={prevImage}
           className="rounded-full"
+          disabled={images.length <= 1}
         >
           <ChevronLeft />
         </Button>
@@ -48,7 +49,11 @@ const ProductGallery = ({ product }) => {
                 : "border-transparent"
             }`}
           >
-            <img src={image} alt="" className="w-full h-full object-cover" />
+            <img
+              src={image}
+              alt={product.name}
+              className="w-full h-full object-cover"
+            />
           </button>
         ))}
 
@@ -57,6 +62,7 @@ const ProductGallery = ({ product }) => {
           variant="outline"
           onClick={nextImage}
           className="rounded-full"
+          disabled={images.length <= 1}
         >
           <ChevronRight />
         </Button>

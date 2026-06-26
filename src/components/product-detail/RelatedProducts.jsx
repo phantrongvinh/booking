@@ -1,14 +1,33 @@
-import products from "@/mockData/products";
+import { useEffect, useState } from "react";
+
+import productAPI from "@/api/productAPI";
+
 import ProductCard from "../menu/ProductCard";
 
 const RelatedProducts = ({ currentProduct }) => {
-  const relatedProducts = products
-    .filter(
-      (item) =>
-        item.category_id === currentProduct.category_id &&
-        item.product_id !== currentProduct.product_id,
-    )
-    .slice(0, 3);
+  const [relatedProducts, setRelatedProducts] = useState([]);
+
+  useEffect(() => {
+    const loadRelatedProducts = async () => {
+      try {
+        const data = await productAPI.fetchProductByCategory(
+          currentProduct.categoryId,
+        );
+
+        const filteredProducts = data
+          .filter((item) => item.productId !== currentProduct.productId)
+          .slice(0, 3);
+
+        setRelatedProducts(filteredProducts);
+      } catch (error) {
+        console.error("Lỗi khi lấy sản phẩm liên quan:", error);
+      }
+    };
+
+    if (currentProduct?.categoryId) {
+      loadRelatedProducts();
+    }
+  }, [currentProduct]);
 
   if (relatedProducts.length === 0) return null;
 
@@ -18,7 +37,7 @@ const RelatedProducts = ({ currentProduct }) => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {relatedProducts.map((product) => (
-          <ProductCard key={product.product_id} product={product} />
+          <ProductCard key={product.productId} product={product} />
         ))}
       </div>
     </section>

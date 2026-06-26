@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -6,11 +7,9 @@ import CartSummary from "@/components/cart/CartSummary";
 import RecommendedProducts from "@/components/cart/RecommendedProducts";
 
 import voucherList from "@/mockData/voucher";
+import cartAPI from "@/api/cartAPI";
 
 import {
-  increaseQty,
-  decreaseQty,
-  removeFromCart,
   toggleSelected,
   toggleSelectAll,
   setVoucher,
@@ -20,19 +19,93 @@ const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const cartItems = useSelector((state) => state.cart.cartItems);
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const selectedProducts = useSelector((state) => state.cart.selectedProducts);
 
   const selectedVoucher = useSelector((state) => state.cart.selectedVoucher);
 
   const shippingFee = useSelector((state) => state.cart.shippingFee);
 
-  // chọn tất cả
+  // ================= FETCH CART =================
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+
+      const data = await cartAPI.fetchCart();
+      setCartItems(data.items ?? []);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCart();
+  }, []);
+
+  // ================= CRUD CART =================
+  const handleIncrease = async (productId, quantity) => {
+    try {
+      setLoading(true);
+
+      await cartAPI.updateCartItem(productId, {
+        quantity: quantity + 1,
+      });
+
+      await fetchCart();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDecrease = async (productId, quantity) => {
+    try {
+      setLoading(true);
+
+      if (quantity <= 1) {
+        await cartAPI.removeCartItem(productId);
+      } else {
+        await cartAPI.updateCartItem(productId, {
+          quantity: quantity - 1,
+        });
+      }
+
+      await fetchCart();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemove = async (productId) => {
+    try {
+      setLoading(true);
+
+      await cartAPI.removeCartItem(productId);
+
+      await fetchCart();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= CALCULATIONS =================
   const allSelected =
-    cartItems?.length > 0 && cartItems?.every((item) => item.selected);
+    cartItems.length > 0 && selectedProducts.length === cartItems.length;
 
-  const selectedItems = cartItems?.filter((item) => item.selected);
+  const selectedItems = cartItems.filter((item) =>
+    selectedProducts.includes(item.productId),
+  );
 
-  const subtotal = selectedItems?.reduce(
+  const subtotal = selectedItems.reduce(
     (sum, item) => sum + item.price * item.quantity,
     0,
   );
@@ -41,28 +114,31 @@ const Cart = () => {
 
   const total = subtotal + shippingFee - discount;
 
+  // ================= HANDLERS =================
   const handleVoucherChange = (voucher) => {
     dispatch(setVoucher(voucher));
   };
 
   const handleCheckout = () => {
-    if (selectedItems?.length === 0) {
+    if (selectedItems.length === 0) {
       alert("Vui lòng chọn ít nhất 1 sản phẩm");
       return;
     }
-
+    // TODO:
+    // // Sau này backend có API checkout
+    // // thì gửi selectedItems lên backend
     navigate("/checkout");
   };
-  console.log({
-    subtotal,
-    shippingFee,
-    discount,
-    total,
-  });
 
   return (
     <div className="container mx-auto py-10">
       <h1 className="mb-6 text-3xl font-bold">Giỏ hàng</h1>
+
+      {loading && (
+        <div className="mb-4 text-center text-gray-600 font-medium">
+          ⏳ Đang xử lý...
+        </div>
+      )}
 
       <div className="grid grid-cols-3 gap-6">
         {/* LEFT */}
@@ -71,21 +147,26 @@ const Cart = () => {
             <input
               type="checkbox"
               checked={allSelected}
-              onChange={() => dispatch(toggleSelectAll())}
+              onChange={() =>
+                dispatch(
+                  toggleSelectAll(cartItems.map((item) => item.productId)),
+                )
+              }
             />
 
-            <span>Chọn tất cả ({cartItems?.length} sản phẩm)</span>
+            <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
           </div>
 
           <div className="space-y-4">
-            {cartItems?.map((item) => (
+            {cartItems.map((item) => (
               <CartItem
-                key={item.product_id}
+                key={item.productId}
                 item={item}
-                onToggle={(product_id) => dispatch(toggleSelected(product_id))}
-                onIncrease={(product_id) => dispatch(increaseQty(product_id))}
-                onDecrease={(product_id) => dispatch(decreaseQty(product_id))}
-                onRemove={(product_id) => dispatch(removeFromCart(product_id))}
+                selected={selectedProducts.includes(item.productId)}
+                onToggle={(id) => dispatch(toggleSelected(id))}
+                onIncrease={(id) => handleIncrease(id, item.quantity)}
+                onDecrease={(id) => handleDecrease(id, item.quantity)}
+                onRemove={handleRemove}
               />
             ))}
           </div>
