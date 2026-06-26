@@ -2,7 +2,7 @@ import axiosClient from "./axiosClient";
 
 const url = "/Products";
 
-const fetchProduct = async () => {
+const fetchAllProduct = async () => {
   const res = await axiosClient.get(`${url}`);
   return res;
 };
@@ -13,7 +13,7 @@ const fetchProductById = async (id) => {
 };
 
 const productAPI = {
-  fetchProduct,
+  fetchAllProduct,
   fetchProductById,
 };
 
