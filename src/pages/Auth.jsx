@@ -1,7 +1,10 @@
 import React, { useState } from "react"; // Gộp lại ở đây
 
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { useFetch } from "@/hook/customHook";
+import { useDispatch, useSelector } from "react-redux";
+import { login } from "@/store/slices/authSlice";
 
 /* Inline SVG icons – no external icon library needed */
 function MailIcon({ size = 16, color = "#FF7A00" }) {
@@ -250,7 +253,14 @@ function AuthPageInner() {
   );
 }
 
-function Field({ icon, type = "text", placeholder, rightSlot }) {
+function Field({
+  icon,
+  type = "text",
+  placeholder,
+  rightSlot,
+  value,
+  onChange,
+}) {
   return (
     <div
       className="flex items-center gap-2 border-b py-2"
@@ -264,6 +274,8 @@ function Field({ icon, type = "text", placeholder, rightSlot }) {
         placeholder={placeholder}
         className="flex-1 bg-transparent outline-none text-sm min-w-0"
         style={{ color: "#2B1B12", height: 28, padding: "4px 0" }}
+        value={value}
+        onChange={onChange}
       />
       {rightSlot ? (
         <span className="flex-shrink-0 flex items-center justify-center">
@@ -287,10 +299,17 @@ function LoginForm({ showPwd, setShowPwd }) {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  // hanleLogin
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { user, token, loading, error } = useSelector((state) => state.auth);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (validate()) {
-      console.log("Form hợp lệ, tiến hành đăng nhập...", formData);
+      await dispatch(login(formData)).unwrap();
+      navigate("/");
     }
   };
 
