@@ -6,6 +6,7 @@ const AccountSideBar = () => {
       name: "Thông tin cá nhân",
       path: "/account/profile",
     },
+
     {
       name: "Thông báo",
       path: "/account/notification",
@@ -21,6 +22,10 @@ const AccountSideBar = () => {
     {
       name: "Địa chỉ giao hàng",
       path: "/account/address",
+    },
+    {
+      name: "Kho voucher",
+      path: "/account/voucher",
     },
     {
       name: "Đổi mật khẩu",

@@ -2,14 +2,14 @@ import axiosClient from "./axiosClient";
 
 const url = "/Auth";
 
-const login = async (data) => {
-  const res = await axiosClient.post(`${url}/login`, data);
-  return res;
+const login = async (form) => {
+  const { data } = await axiosClient.post(`${url}/login`, form);
+  return data;
 };
 
 const register = async () => {
-  const res = await axiosClient.post(`${url}/register`);
-  return res;
+  const { data } = await axiosClient.post(`${url}/register`);
+  return data;
 };
 
 const authAPI = {

@@ -1,3 +1,4 @@
+import { useSelector } from "react-redux";
 import ButtonCustom from "../ButtonCustom";
 
 const Profile = () => {
@@ -5,6 +6,9 @@ const Profile = () => {
     event.preventDefault();
     console.log("Profile");
   };
+
+  const { user } = useSelector((state) => state.auth);
+
   return (
     <>
       <h2 className="text-2xl font-bold text-[#6B4E41] mb-6">
@@ -17,7 +21,7 @@ const Profile = () => {
 
           <input
             className="w-full border rounded-lg p-3 mt-1"
-            defaultValue="Phan Trong Vinh"
+            defaultValue={user.username}
           />
         </div>
 
@@ -26,7 +30,7 @@ const Profile = () => {
 
           <input
             className="w-full border rounded-lg p-3 mt-1"
-            defaultValue="1phantrongvinh98@gmail.com"
+            defaultValue={user.email}
           />
         </div>
 

@@ -5,9 +5,9 @@ export const fetchAllProduct = createAsyncThunk(
   "product/productSlice",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await productAPI.fetchAllProduct();
+      const res = await productAPI.fetchProduct();
 
-      return res.data;
+      return res;
     } catch (error) {
       return rejectWithValue("Không có dữ liệu của sản phẩm");
     }

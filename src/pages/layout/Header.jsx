@@ -1,5 +1,11 @@
 import { logout } from "@/store/slices/authSlice";
-import { LogOut, Search, ShoppingBag, User } from "lucide-react";
+import {
+  LayoutDashboard,
+  LogOut,
+  Search,
+  ShoppingBag,
+  User,
+} from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,7 +19,9 @@ const navItems = [
 ];
 
 export default function Header() {
-  const { isLoggedIn, user } = useSelector((state) => state.auth);
+  const { isLoggedIn, user, isAdmin, isStaff } = useSelector(
+    (state) => state.auth,
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -28,12 +36,15 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await dispatch(logout()).unwrap();
     setOpen(false);
     navigate("/");
   };
 
+  useEffect(() => {
+    console.log(isLoggedIn);
+  });
   return (
     <>
       <div className="py-1 bg-[#FFC13B]">
@@ -131,6 +142,28 @@ export default function Header() {
                           <User size={16} />
                           Hồ sơ cá nhân
                         </Link>
+
+                        {isAdmin ? (
+                          <Link
+                            to="/admin"
+                            onClick={() => setOpen(false)}
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-[#2B1B12] hover:bg-[#FFC13B]/20 transition-colors"
+                          >
+                            <LayoutDashboard size={16} />
+                            Trang quản trị
+                          </Link>
+                        ) : (
+                          isStaff && (
+                            <Link
+                              to="/staff"
+                              onClick={() => setOpen(false)}
+                              className="flex items-center gap-3 px-4 py-2 text-sm text-[#2B1B12] hover:bg-[#FFC13B]/20 transition-colors"
+                            >
+                              <LayoutDashboard size={16} />
+                              Thống kê nhân viên
+                            </Link>
+                          )
+                        )}
 
                         {/* Đăng xuất */}
                         <button

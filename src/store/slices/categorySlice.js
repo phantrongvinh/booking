@@ -6,9 +6,9 @@ export const fetchAllCategory = createAsyncThunk(
   "category/categorySlice",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await categoryAPI.fetchAllCategory();
+      const res = await categoryAPI.fetchCategory();
 
-      return res.data;
+      return res;
     } catch (error) {
       return rejectWithValue("Không có dữ liệu danh mục");
     }
