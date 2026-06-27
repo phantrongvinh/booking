@@ -38,10 +38,19 @@ const cartSlice = createSlice({
     setShippingFee: (state, action) => {
       state.shippingFee = action.payload;
     },
+
+    clearSelected: (state) => {
+      state.selectedProducts = [];
+    },
   },
 });
 
-export const { toggleSelected, toggleSelectAll, setVoucher, setShippingFee } =
-  cartSlice.actions;
+export const {
+  toggleSelected,
+  toggleSelectAll,
+  setVoucher,
+  setShippingFee,
+  clearSelected,
+} = cartSlice.actions;
 
 export default cartSlice.reducer;

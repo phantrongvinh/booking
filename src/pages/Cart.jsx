@@ -13,6 +13,7 @@ import {
   toggleSelected,
   toggleSelectAll,
   setVoucher,
+  clearSelected,
 } from "@/store/slices/cartSlice";
 
 const Cart = () => {
@@ -46,7 +47,7 @@ const Cart = () => {
     fetchCart();
   }, []);
 
-  // ================= CRUD CART =================
+  // ================= CRUD SINGLE ITEM =================
   const handleIncrease = async (productId, quantity) => {
     try {
       setLoading(true);
@@ -56,8 +57,6 @@ const Cart = () => {
       });
 
       await fetchCart();
-    } catch (error) {
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -76,8 +75,6 @@ const Cart = () => {
       }
 
       await fetchCart();
-    } catch (error) {
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -90,6 +87,26 @@ const Cart = () => {
       await cartAPI.removeCartItem(productId);
 
       await fetchCart();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= BULK DELETE =================
+  const handleRemoveSelected = async () => {
+    try {
+      if (selectedProducts.length === 0) {
+        alert("Chưa chọn sản phẩm nào để xóa");
+        return;
+      }
+
+      setLoading(true);
+
+      await cartAPI.removeCartItems(selectedProducts);
+
+      await fetchCart();
+
+      dispatch(clearSelected());
     } catch (error) {
       console.error(error);
     } finally {
@@ -124,9 +141,7 @@ const Cart = () => {
       alert("Vui lòng chọn ít nhất 1 sản phẩm");
       return;
     }
-    // TODO:
-    // // Sau này backend có API checkout
-    // // thì gửi selectedItems lên backend
+
     navigate("/checkout");
   };
 
@@ -143,20 +158,31 @@ const Cart = () => {
       <div className="grid grid-cols-3 gap-6">
         {/* LEFT */}
         <div className="col-span-2 rounded-3xl bg-[#F7E7BE] p-6">
-          <div className="mb-6 flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={() =>
-                dispatch(
-                  toggleSelectAll(cartItems.map((item) => item.productId)),
-                )
-              }
-            />
+          {/* HEADER ACTION */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() =>
+                  dispatch(
+                    toggleSelectAll(cartItems.map((item) => item.productId)),
+                  )
+                }
+              />
 
-            <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
+              <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
+            </div>
+
+            <button
+              onClick={handleRemoveSelected}
+              className="rounded-xl bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              Xóa đã chọn
+            </button>
           </div>
 
+          {/* ITEMS */}
           <div className="space-y-4">
             {cartItems.map((item) => (
               <CartItem
