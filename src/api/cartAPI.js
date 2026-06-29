@@ -26,6 +26,14 @@ const removeCartItem = async (productId) => {
   return data;
 };
 
+const removeCartItems = async (productIds) => {
+  const { data } = await axiosClient.delete(`${url}/items`, {
+    data: productIds,
+  });
+
+  return data;
+};
+
 const clearCart = async () => {
   const { data } = await axiosClient.delete(url);
 
@@ -37,5 +45,6 @@ export default {
   addToCart,
   updateCartItem,
   removeCartItem,
+  removeCartItems,
   clearCart,
 };

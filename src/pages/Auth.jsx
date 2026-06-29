@@ -1,10 +1,9 @@
 import React, { useState } from "react"; // Gộp lại ở đây
 
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Mail, Lock, User, Eye, EyeOff } from "lucide-react";
-import { useFetch } from "@/hook/customHook";
-import { useDispatch, useSelector } from "react-redux";
-import { login } from "@/store/slices/authSlice";
+import { useDispatch } from "react-redux";
+import { login, register } from "@/store/slices/authSlice";
 
 /* Inline SVG icons – no external icon library needed */
 function MailIcon({ size = 16, color = "#FF7A00" }) {
@@ -290,28 +289,32 @@ function LoginForm({ showPwd, setShowPwd }) {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const validate = () => {
-    let newErrors = {};
+    const newErrors = {};
     if (!formData.email) newErrors.email = "Vui lòng nhập Email hoặc SĐT";
     if (formData.password.length < 6)
       newErrors.password = "Mật khẩu phải từ 6 ký tự";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  // hanleLogin
-  const dispatch = useDispatch();
-
-  const navigate = useNavigate();
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (validate()) {
+
+    if (!validate()) return;
+
+    try {
       const res = await dispatch(login(formData)).unwrap();
 
       if (res.roleId === 1) navigate("/");
       else if (res.roleId === 2) navigate("/staff");
       else navigate("/");
+    } catch (err) {
+      setErrors({ api: err });
     }
   };
 
@@ -406,11 +409,46 @@ function LoginForm({ showPwd, setShowPwd }) {
 }
 
 function RegisterForm({ showPwd, setShowPwd }) {
-  // Giả lập trạng thái lỗi
-  const [errors, setErrors] = React.useState({});
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+    phone: "",
+  });
+
+  const [errors, setErrors] = useState({});
+
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const validate = () => {
+    const newErrors = {};
+
+    if (!formData.username) newErrors.username = "Vui lòng nhập username";
+    if (!formData.email) newErrors.email = "Vui lòng nhập email";
+    if (formData.password.length < 6)
+      newErrors.password = "Mật khẩu phải ≥ 6 ký tự";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    try {
+      await dispatch(register(formData)).unwrap();
+
+      navigate("/auth");
+    } catch (err) {
+      setErrors({ api: err });
+    }
+  };
 
   return (
-    <form className="space-y-7" onSubmit={(e) => e.preventDefault()}>
+    <form className="space-y-7" onSubmit={handleSubmit}>
       <h2 className="text-center text-2xl font-bold text-[#2B1B12] mb-8">
         Tạo tài khoản mới
       </h2>
@@ -418,14 +456,20 @@ function RegisterForm({ showPwd, setShowPwd }) {
       {/* Input Group */}
       <div className="space-y-5">
         <InputField
-          label="Họ và tên"
+          label="Tên người dùng"
           icon={<UserIcon size={18} color="#FF7A00" />}
-          error={errors.name}
+          value={formData.username}
+          onChange={(e) =>
+            setFormData({ ...formData, username: e.target.value })
+          }
+          error={errors.username}
         />
 
         <InputField
           label="Email hoặc Số điện thoại"
           icon={<MailIcon size={18} color="#FF7A00" />}
+          value={formData.email}
+          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
           error={errors.email}
         />
 
@@ -433,12 +477,16 @@ function RegisterForm({ showPwd, setShowPwd }) {
           label="Mật khẩu"
           type={showPwd ? "text" : "password"}
           icon={<LockIcon size={18} color="#FF7A00" />}
+          value={formData.password}
+          onChange={(e) =>
+            setFormData({ ...formData, password: e.target.value })
+          }
           error={errors.password}
           rightSlot={
             <button
               type="button"
               onClick={() => setShowPwd(!showPwd)}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full"
             >
               {showPwd ? (
                 <EyeIcon size={18} color="#7A6A5C" />
