@@ -1,16 +1,30 @@
 import { createSlice } from "@reduxjs/toolkit";
 
+const initialState = {
+  cartItems: [],
+  selectedProducts: [],
+  selectedVoucher: null,
+  shippingFee: 10000,
+};
+
 const cartSlice = createSlice({
   name: "cart",
-  initialState: {
-    selectedProducts: [],
-    selectedVoucher: null,
-    shippingFee: 10000,
-  },
+  initialState,
 
   reducers: {
+    setCartItems: (state, action) => {
+      state.cartItems = action.payload;
+
+      // ✅ MẶC ĐỊNH: có cart là auto select all
+      state.selectedProducts = action.payload.map((item) => item.productId);
+    },
+
     toggleSelected: (state, action) => {
       const productId = action.payload;
+
+      if (!state.selectedProducts) {
+        state.selectedProducts = [];
+      }
 
       if (state.selectedProducts.includes(productId)) {
         state.selectedProducts = state.selectedProducts.filter(
@@ -22,7 +36,7 @@ const cartSlice = createSlice({
     },
 
     toggleSelectAll: (state, action) => {
-      const productIds = action.payload;
+      const productIds = action.payload || [];
 
       if (state.selectedProducts.length === productIds.length) {
         state.selectedProducts = [];
@@ -46,6 +60,7 @@ const cartSlice = createSlice({
 });
 
 export const {
+  setCartItems,
   toggleSelected,
   toggleSelectAll,
   setVoucher,
