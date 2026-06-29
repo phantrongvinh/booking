@@ -2,11 +2,11 @@ import { Bell, Menu, Search } from "lucide-react";
 
 const StaffHeader = ({ sidebarOpen, setSidebarOpen }) => {
   return (
-    <header className="sticky top-0 z-40 h-16 bg-white border-b flex items-center justify-between px-6">
+    <header className="sticky top-0 z-30 flex items-center justify-between gap-4 border-b bg-white/90 px-6 py-4 backdrop-blur">
       {/* Left */}
       <div className="flex items-center gap-4">
         <button
-          className="lg:hidden"
+          className="rounded-lg p-2 hover:bg-gray-100 lg:hidden"
           onClick={() => setSidebarOpen(!sidebarOpen)}
         >
           <Menu size={24} />

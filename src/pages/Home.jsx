@@ -3,7 +3,7 @@ import Category from "@/components/home/Category";
 import ProductList from "@/components/home/ProductList";
 import Slide from "@/components/home/Slide";
 import { Link } from "react-router-dom";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import { useFetch } from "@/hook/customHook";

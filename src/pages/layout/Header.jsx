@@ -1,4 +1,6 @@
+import { useFetch } from "@/hook/customHook";
 import { logout } from "@/store/slices/authSlice";
+import { fetchMe } from "@/store/slices/userSlice";
 import {
   LayoutDashboard,
   LogOut,
@@ -19,9 +21,7 @@ const navItems = [
 ];
 
 export default function Header() {
-  const { isLoggedIn, user, isAdmin, isStaff } = useSelector(
-    (state) => state.auth,
-  );
+  const { isLoggedIn, isAdmin, isStaff } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -37,14 +37,24 @@ export default function Header() {
   }, []);
 
   const handleLogout = async () => {
-    await dispatch(logout()).unwrap();
+    await dispatch(logout());
     setOpen(false);
     navigate("/");
   };
 
-  useEffect(() => {
-    console.log(isLoggedIn);
-  });
+  // fetch me
+  const {
+    data: { user },
+    loading,
+  } = useFetch(
+    async () => {
+      const user = await dispatch(fetchMe()).unwrap();
+      return { user };
+    },
+    {
+      initialData: { user: null },
+    },
+  );
   return (
     <>
       <div className="py-1 bg-[#FFC13B]">
@@ -126,7 +136,7 @@ export default function Header() {
                         {/* Tên user */}
                         <div className="px-4 py-2 border-b border-gray-100">
                           <p className="text-sm font-semibold text-[#2B1B12] truncate">
-                            {user?.username}
+                            {user?.fullName}
                           </p>
                           <p className="text-xs text-gray-400 truncate">
                             {user?.email}

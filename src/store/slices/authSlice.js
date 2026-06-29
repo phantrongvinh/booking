@@ -1,10 +1,6 @@
 import authAPI from "@/api/authAPI";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-// Load initial data
-const savedUser = JSON.parse(localStorage.getItem("user"));
-const savedToken = localStorage.getItem("token");
-
 export const login = createAsyncThunk(
   "auth/login",
   async (form, { rejectWithValue }) => {
@@ -14,7 +10,7 @@ export const login = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || "Đăng nhập thất bại");
     }
-  }
+  },
 );
 
 export const register = createAsyncThunk(
@@ -26,11 +22,11 @@ export const register = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(error.response?.data || "Đăng ký thất bại");
     }
-  }
+  },
 );
 
 const getRole = (roleId) => {
-  switch (roleId) {
+  switch (Number(roleId)) {
     case 1:
       return "ADMIN";
     case 2:
@@ -40,12 +36,16 @@ const getRole = (roleId) => {
   }
 };
 
+// Load initial data
+const savedRole = getRole(localStorage.getItem("roleId"));
+const savedToken = localStorage.getItem("token");
+
 const initialState = {
-  user: savedUser || null,
+  role: savedRole ?? null,
   token: savedToken || null,
   isLoggedIn: !!savedToken,
-  isAdmin: savedUser?.role === "ADMIN",
-  isStaff: savedUser?.role === "STAFF",
+  isAdmin: savedRole === "ADMIN",
+  isStaff: savedRole === "STAFF",
   loading: false,
   error: null,
 };
@@ -55,7 +55,6 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout: (state) => {
-      state.user = null;
       state.token = null;
       state.isLoggedIn = false;
       state.isAdmin = false;
@@ -63,7 +62,6 @@ const authSlice = createSlice({
       state.error = null;
 
       localStorage.removeItem("token");
-      localStorage.removeItem("user");
     },
   },
   extraReducers: (builder) => {
@@ -78,20 +76,16 @@ const authSlice = createSlice({
 
         const token = action.payload.token;
 
-        const user = {
-          username: action.payload?.username,
-          email: action.payload?.email,
-          role: getRole(action.payload?.roleId),
-        };
-
         state.token = token;
-        state.user = user;
         state.isLoggedIn = true;
-        state.isAdmin = user.role === "ADMIN";
-        state.isStaff = user.role === "STAFF";
+
+        state.role = getRole(action.payload.roleId);
+
+        state.isAdmin = state.role === "ADMIN";
+        state.isStaff = state.role === "STAFF";
 
         localStorage.setItem("token", token);
-        localStorage.setItem("user", JSON.stringify(user));
+        localStorage.setItem("roleId", action.payload.roleId);
       })
       .addCase(login.rejected, (state, action) => {
         state.loading = false;
@@ -114,4 +108,4 @@ const authSlice = createSlice({
 });
 
 export const { logout } = authSlice.actions;
-export const authReducer = authSlice.reducer;
+export default authSlice.reducer;

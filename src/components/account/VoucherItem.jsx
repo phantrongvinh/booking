@@ -16,50 +16,53 @@ const VoucherItem = ({ voucher }) => {
   };
   return (
     <div
-      className={`bg-white rounded-2xl shadow border overflow-hidden flex ${
-        voucher.status === "EXPIRED" || voucher.status === "USED"
-          ? "opacity-60"
-          : ""
-      }`}
+      className={`bg-white rounded-xl md:rounded-2xl shadow border overflow-hidden
+  flex flex-col sm:flex-row
+  ${voucher.status === "EXPIRED" || voucher.status === "USED" ? "opacity-60" : ""}`}
     >
       {/* Left */}
-      <div className="w-40 bg-[#FFF4E8] flex flex-col justify-center items-center border-r">
+      <div
+        className="w-full sm:w-40 bg-[#FFF4E8] border-b sm:border-b-0 sm:border-r
+                  flex justify-center items-center py-6 px-4"
+      >
         {voucher.discountType === "PERCENT" && (
-          <>
+          <div className="text-center">
             <h2 className="text-3xl font-bold text-[#FF7A00]">
               {voucher.discountValue}%
             </h2>
             <p className="text-[#6B4E41] font-medium">OFF</p>
-          </>
+          </div>
         )}
 
         {voucher.discountType === "AMOUNT" && (
-          <>
+          <div className="text-center">
             <h2 className="text-2xl font-bold text-[#FF7A00]">
               {voucher.discountValue / 1000}K
             </h2>
             <p className="text-[#6B4E41] font-medium">Voucher</p>
-          </>
+          </div>
         )}
 
         {voucher.discountType === "SHIPPING" && (
-          <>
+          <div className="text-center">
             <h2 className="text-3xl">🚚</h2>
             <p className="text-[#6B4E41] font-medium">Freeship</p>
-          </>
+          </div>
         )}
       </div>
 
       {/* Right */}
-      <div className="flex-1 p-5 flex justify-between">
-        <div>
-          <h3 className="font-semibold text-lg text-[#6B4E41]">
+      <div className="flex-1 p-4 md:p-5 flex flex-col md:flex-row md:justify-between gap-4">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-lg text-[#6B4E41] break-words">
             {voucher.title}
           </h3>
 
-          <p className="text-gray-500 mt-1">{voucher.description}</p>
+          <p className="text-gray-500 mt-1 break-words">
+            {voucher.description}
+          </p>
 
-          <p className="text-gray-500">
+          <p className="text-gray-500 mt-2">
             Đơn tối thiểu: {ulti.formatVND(voucher.minOrder)}
           </p>
 
@@ -72,11 +75,9 @@ const VoucherItem = ({ voucher }) => {
           <p className="text-sm text-red-500 mt-3">HSD: {voucher.expireDate}</p>
         </div>
 
-        <div className="flex flex-col justify-between items-end">
+        <div className="flex flex-row md:flex-col justify-between md:items-end items-center gap-3">
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium ${
-              statusColor[voucher.status]
-            }`}
+            className={`px-3 py-1 rounded-full text-sm font-medium ${statusColor[voucher.status]}`}
           >
             {statusText[voucher.status]}
           </span>
