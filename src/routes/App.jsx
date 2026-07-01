@@ -92,6 +92,7 @@ function App() {
           s
           <Route index element={<StaffHome />} />
           <Route path="orders" element={<StaffOrder />} />
+          <Route path="orders/:id" element={<StaffOrder />} />
           <Route path="products" element={<StaffProduct />} />
           <Route path="ingredients" element={<StaffIngredient />} />
           {/* <Route path="bill" element={<PrintBill />} /> */}
