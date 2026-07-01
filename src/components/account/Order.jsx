@@ -88,7 +88,7 @@ const Order = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {orders.map((order) => (
         <OrderItem order={order} key={order.id} />
       ))}

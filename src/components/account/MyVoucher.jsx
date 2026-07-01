@@ -117,12 +117,12 @@ const MyVoucher = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto py-8">
-      <h2 className="text-3xl font-bold text-[#6B4E41] mb-6">
+    <div className="max-w-6xl mx-auto py-6 md:py-8 px-4">
+      <h2 className="text-2xl md:text-3xl font-bold text-[#6B4E41] mb-6">
         🎟 Kho Voucher của tôi
       </h2>
 
-      <div className="space-y-5">
+      <div className="space-y-4 md:space-y-5">
         {myVouchers.map((voucher) => (
           <VoucherItem key={voucher.id} voucher={voucher} />
         ))}

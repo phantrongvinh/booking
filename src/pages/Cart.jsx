@@ -13,20 +13,25 @@ import {
   toggleSelected,
   toggleSelectAll,
   setVoucher,
+  clearSelected,
+  setCartItems,
 } from "@/store/slices/cartSlice";
 
 const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const selectedProducts = useSelector((state) => state.cart.selectedProducts);
+  const cartItems = useSelector((state) => state.cart?.cartItems ?? []);
 
-  const selectedVoucher = useSelector((state) => state.cart.selectedVoucher);
+  const selectedProducts = useSelector(
+    (state) => state.cart?.selectedProducts ?? [],
+  );
 
-  const shippingFee = useSelector((state) => state.cart.shippingFee);
+  const selectedVoucher = useSelector((state) => state.cart?.selectedVoucher);
+
+  const shippingFee = useSelector((state) => state.cart?.shippingFee ?? 0);
 
   // ================= FETCH CART =================
   const fetchCart = async () => {
@@ -34,7 +39,8 @@ const Cart = () => {
       setLoading(true);
 
       const data = await cartAPI.fetchCart();
-      setCartItems(data.items ?? []);
+
+      dispatch(setCartItems(data?.items ?? []));
     } catch (error) {
       console.error(error);
     } finally {
@@ -46,7 +52,7 @@ const Cart = () => {
     fetchCart();
   }, []);
 
-  // ================= CRUD CART =================
+  // ================= CRUD SINGLE ITEM =================
   const handleIncrease = async (productId, quantity) => {
     try {
       setLoading(true);
@@ -56,8 +62,6 @@ const Cart = () => {
       });
 
       await fetchCart();
-    } catch (error) {
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -76,8 +80,6 @@ const Cart = () => {
       }
 
       await fetchCart();
-    } catch (error) {
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -90,6 +92,25 @@ const Cart = () => {
       await cartAPI.removeCartItem(productId);
 
       await fetchCart();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ================= BULK DELETE =================
+  const handleRemoveSelected = async () => {
+    try {
+      if (!selectedProducts.length) {
+        alert("Chưa chọn sản phẩm nào để xóa");
+        return;
+      }
+
+      setLoading(true);
+
+      await cartAPI.removeCartItems(selectedProducts);
+
+      await fetchCart();
+      dispatch(clearSelected());
     } catch (error) {
       console.error(error);
     } finally {
@@ -101,7 +122,7 @@ const Cart = () => {
   const allSelected =
     cartItems.length > 0 && selectedProducts.length === cartItems.length;
 
-  const selectedItems = cartItems.filter((item) =>
+  const selectedItems = (cartItems ?? []).filter((item) =>
     selectedProducts.includes(item.productId),
   );
 
@@ -110,7 +131,7 @@ const Cart = () => {
     0,
   );
 
-  const discount = selectedVoucher?.discount || 0;
+  const discount = selectedVoucher?.discount ?? 0;
 
   const total = subtotal + shippingFee - discount;
 
@@ -120,13 +141,11 @@ const Cart = () => {
   };
 
   const handleCheckout = () => {
-    if (selectedItems.length === 0) {
+    if (!selectedItems.length) {
       alert("Vui lòng chọn ít nhất 1 sản phẩm");
       return;
     }
-    // TODO:
-    // // Sau này backend có API checkout
-    // // thì gửi selectedItems lên backend
+
     navigate("/checkout");
   };
 
@@ -143,27 +162,38 @@ const Cart = () => {
       <div className="grid grid-cols-3 gap-6">
         {/* LEFT */}
         <div className="col-span-2 rounded-3xl bg-[#F7E7BE] p-6">
-          <div className="mb-6 flex items-center gap-3">
-            <input
-              type="checkbox"
-              checked={allSelected}
-              onChange={() =>
-                dispatch(
-                  toggleSelectAll(cartItems.map((item) => item.productId)),
-                )
-              }
-            />
+          {/* HEADER */}
+          <div className="mb-6 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={() =>
+                  dispatch(
+                    toggleSelectAll(cartItems.map((item) => item.productId)),
+                  )
+                }
+              />
 
-            <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
+              <span>Chọn tất cả ({cartItems.length} sản phẩm)</span>
+            </div>
+
+            <button
+              onClick={handleRemoveSelected}
+              className="rounded-xl bg-red-500 px-4 py-2 text-white hover:bg-red-600"
+            >
+              Xóa đã chọn
+            </button>
           </div>
 
+          {/* ITEMS */}
           <div className="space-y-4">
             {cartItems.map((item) => (
               <CartItem
-                key={item.productId}
+                key={item.productId ?? item.id}
                 item={item}
                 selected={selectedProducts.includes(item.productId)}
-                onToggle={(id) => dispatch(toggleSelected(id))}
+                onToggle={() => dispatch(toggleSelected(item.productId))}
                 onIncrease={(id) => handleIncrease(id, item.quantity)}
                 onDecrease={(id) => handleDecrease(id, item.quantity)}
                 onRemove={handleRemove}

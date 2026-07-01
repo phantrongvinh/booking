@@ -7,40 +7,49 @@ const OrderItem = ({ order }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border overflow-hidden">
+    <div className="bg-white rounded-xl md:rounded-2xl shadow-sm border overflow-hidden">
       {/* Header */}
-      <div className="flex justify-between items-center px-6 py-4 border-b">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 px-4 md:px-6 py-4 border-b">
         <div>
-          <h3 className="font-semibold text-lg text-[#6B4E41]">#{order.id}</h3>
+          <h3 className="font-semibold text-base md:text-lg text-[#6B4E41]">
+            #{order.id}
+          </h3>
           <p className="text-sm text-gray-500">Ngày đặt: {order.createdAt}</p>
         </div>
 
-        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+        <span className="self-start sm:self-auto bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
           {order.status}
         </span>
       </div>
 
       {/* Product list */}
-      <div className="px-6 py-4">
+      <div className="px-4 md:px-6 py-2">
         {order.items.map((item) => (
           <div
             key={item.id}
-            className="flex items-center gap-4 py-3 border-b last:border-none"
+            className="flex gap-3 md:gap-4 py-4 border-b last:border-none"
           >
             <img
               src={item.image}
               alt=""
-              className="w-20 h-20 rounded-xl object-cover"
+              className="w-16 h-16 md:w-20 md:h-20 rounded-xl object-cover shrink-0"
             />
 
-            <div className="flex-1">
-              <h4 className="font-medium text-[#6B4E41]">{item.name}</h4>
-              <p className="text-sm text-gray-500">
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium text-[#6B4E41] line-clamp-2">
+                {item.name}
+              </h4>
+
+              <p className="text-sm text-gray-500 mt-1">
                 Số lượng: x{item.quantity}
+              </p>
+
+              <p className="font-semibold text-[#6B4E41] mt-2 md:hidden">
+                {ulti.formatVND(item.price)}
               </p>
             </div>
 
-            <div className="font-semibold text-[#6B4E41]">
+            <div className="hidden md:block font-semibold text-[#6B4E41]">
               {ulti.formatVND(item.price)}
             </div>
           </div>
@@ -48,31 +57,30 @@ const OrderItem = ({ order }) => {
       </div>
 
       {/* Footer */}
-      <div className="px-6 py-4 bg-[#FFF8E8] flex justify-between items-center">
-        <div>
+      <div className="px-4 md:px-6 py-4 bg-[#FFF8E8]">
+        <div className="flex justify-between items-center">
           <span className="text-gray-600">Tổng tiền:</span>
-          <span className="ml-2 text-xl font-bold text-[#FF7A00]">
-            {order.totalAmount.toLocaleString()}đ
+
+          <span className="text-lg md:text-xl font-bold text-[#FF7A00]">
+            {ulti.formatVND(order.totalAmount)}
           </span>
         </div>
 
-        <div className="flex gap-3">
-          {/* Đang xử lý */}
+        <div className="flex flex-col sm:flex-row gap-2 mt-4">
           {order.status === "PROCESSING" && (
             <ButtonCustom
               size="lg"
               name="Hủy đơn"
               color="border-[#ff0000] text-[#ff0000] hover:bg-[#ff0000]"
-            ></ButtonCustom>
+            />
           )}
 
-          {/* Hoàn thành */}
           {order.status === "COMPLETED" && (
             <ButtonCustom
               size="lg"
               name="Mua lại"
               color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00]"
-            ></ButtonCustom>
+            />
           )}
 
           <ButtonCustom
@@ -80,7 +88,7 @@ const OrderItem = ({ order }) => {
             name="Xem chi tiết"
             color="border-[#6B4E41] text-[#6B4E41] hover:bg-[#6B4E41]"
             onClick={() => handleClick(order)}
-          ></ButtonCustom>
+          />
         </div>
       </div>
     </div>
