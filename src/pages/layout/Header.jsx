@@ -66,7 +66,6 @@ useEffect(() => {
     navigate("/");
   };
 
-
   useEffect(() => {
     console.log(isLoggedIn);
   });
@@ -76,7 +75,6 @@ const handleSearch = (e) => {
 
   searchProduct(value);
 };
-
 
   const {
     data: { user },
@@ -90,7 +88,6 @@ const handleSearch = (e) => {
       initialData: { user: null },
     },
   );
-
   return (
     <>
       <div className="py-1 bg-[#FFC13B]">
