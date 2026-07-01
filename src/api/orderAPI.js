@@ -7,7 +7,13 @@ const fetchAllOrder = async () => {
   return res.data;
 };
 
+const createOrder = async (data) => {
+  const res = await axiosClient.post(url, data);
+  return res.data;
+};
+
 const orderAPI = {
   fetchAllOrder,
+  createOrder,
 };
 export default orderAPI;
