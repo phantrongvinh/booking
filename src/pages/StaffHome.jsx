@@ -7,6 +7,8 @@ import { useDispatch } from "react-redux";
 import { fetchOrder } from "@/store/slices/orderSlice";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import ulti from "@/ultis/ulti";
+import { Printer } from "lucide-react";
 
 const StaffHome = () => {
   const dispatch = useDispatch();
@@ -25,7 +27,7 @@ const StaffHome = () => {
     },
   );
 
-  const recent = orders
+  const recent = [...orders]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
@@ -150,13 +152,13 @@ const StaffHome = () => {
                     {/* Tổng tiền */}
                     <td className="px-6 py-4 text-right">
                       <span className="font-bold text-orange-600">
-                        {formatVND(order.totalPrice)}
+                        {ulti.formatVND(order.totalPrice)}
                       </span>
                     </td>
 
                     {/* Trạng thái */}
                     <td className="px-6 py-4 text-center">
-                      <OrderStatusBadge status={order.status} />
+                      {/* <OrderStatusBadge status={order.status} /> */}
                     </td>
 
                     {/* Ngày tạo */}
