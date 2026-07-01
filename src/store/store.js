@@ -1,8 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authReducer } from "./slices/authSlice";
+import authReducer from "./slices/authSlice";
 import cartReducer from "./slices/cartSlice";
 import categoryReducer from "./slices/categorySlice";
 import productReducer from "./slices/productSlice";
+import userReducer from "./slices/userSlice";
+import orderReducer from "./slices/orderSlice";
+import ingredientReducer from "./slices/ingredientSlice";
 
 const loadCart = () => {
   try {
@@ -38,6 +41,9 @@ export const store = configureStore({
     cart: cartReducer,
     category: categoryReducer,
     product: productReducer,
+    user: userReducer,
+    order: orderReducer,
+    ingredient: ingredientReducer,
   },
 
   preloadedState: {

@@ -1,5 +1,4 @@
 import categoryAPI from "@/api/categoryAPI";
-import categories from "@/mockData/categories";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const fetchAllCategory = createAsyncThunk(

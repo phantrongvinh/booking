@@ -8,8 +8,8 @@ export const PublicOnlyRoute = ({ children }) => {
 };
 
 export const PrivateRoute = ({ children, roles }) => {
-  const { isLoggedIn, user } = useSelector((state) => state.auth);
+  const { isLoggedIn, role } = useSelector((state) => state.auth);
   if (!isLoggedIn) return <Navigate to="/auth" replace />;
-  if (roles && !roles.includes(user?.role)) return <Navigate to="/" replace />;
+  if (roles && !roles.includes(role)) return <Navigate to="/" replace />;
   return children;
 };

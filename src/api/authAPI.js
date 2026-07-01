@@ -7,8 +7,8 @@ const login = async (form) => {
   return data;
 };
 
-const register = async () => {
-  const { data } = await axiosClient.post(`${url}/register`);
+const register = async (form) => {
+  const { data } = await axiosClient.post(`${url}/register`, form);
   return data;
 };
 

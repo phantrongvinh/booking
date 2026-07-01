@@ -1,67 +1,71 @@
 import {
-  ChartColumn,
-  Folder,
   LayoutDashboard,
-  LogOut,
-  Package,
-  Settings,
   ShoppingBag,
-  Star,
-  Tags,
-  Users,
+  Wheat,
+  Cake,
+  Printer,
+  LogOut,
 } from "lucide-react";
-import SidebarItem from "./SideBarItem";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
+import { cn } from "@/lib/utils";
+import { NavLink } from "react-router-dom";
 
-const StaffSideBar = ({ className = "" }) => {
+const navItems = [
+  { to: "/staff", label: "Tổng Quan", icon: LayoutDashboard, end: true },
+  { to: "/staff/orders", label: "Đơn hàng", icon: ShoppingBag, end: true },
+  // { to: "/don-xu-ly", label: "Đơn xử lý", icon: ClipboardList },
+  { to: "/staff/products", label: "Sản phẩm", icon: Cake, end: true },
+  { to: "/staff/ingredients", label: "Nguyên liệu", icon: Wheat, end: true },
+  { to: "/staff/bill", label: "In phiếu chế biến", icon: Printer, end: true },
+];
+
+const StaffSideBar = ({ onNavigate }) => {
   const dispatch = useDispatch();
 
-  const handleLogout = async () => {
-    await dispatch(logout()).unwrap();
+  const handleLogout = () => {
+    dispatch(logout());
   };
 
   return (
-    <aside
-      className={`bg-white border-r shadow-sm flex flex-col h-full ${className}`}
-    >
-      {/* Logo */}
+    <aside className="flex min-h-screen w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar">
+      <div className="flex items-center gap-2.5 px-6 py-6">
+        <div className="leading-tight">
+          <p className="text-lg text-muted-foreground">Tiệm bánh ngọt</p>
+        </div>
+      </div>
 
-      {/* Menu */}
-
-      <nav className="flex-1 p-4 space-y-2">
-        <SidebarItem
-          icon={<LayoutDashboard size={20} />}
-          text="Dashboard"
-          active
-        />
-
-        <SidebarItem icon={<Package size={20} />} text="Orders" />
-
-        <SidebarItem icon={<ShoppingBag size={20} />} text="Products" />
-
-        <SidebarItem icon={<Tags size={20} />} text="Vouchers" />
-
-        <SidebarItem icon={<Folder size={20} />} text="Categories" />
-
-        <SidebarItem icon={<Users size={20} />} text="Customers" />
-
-        <SidebarItem icon={<Star size={20} />} text="Reviews" />
-
-        <SidebarItem icon={<ChartColumn size={20} />} text="Reports" />
-
-        <SidebarItem icon={<Settings size={20} />} text="Settings" />
+      <nav className="flex-1 space-y-1 px-3 py-2">
+        {navItems.map(({ to, label, icon: Icon }) => {
+          return (
+            <NavLink
+              key={to}
+              to={to}
+              end
+              onClick={onNavigate}
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200",
+                  isActive
+                    ? "bg-orange-100 text-orange-600 shadow-sm"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-orange-500",
+                )
+              }
+            >
+              <Icon className="h-[18px] w-[18px]" />
+              {label}
+            </NavLink>
+          );
+        })}
       </nav>
 
-      {/* Logout */}
-
-      <div className="border-t p-4">
+      <div className="border-t border-sidebar-border p-3">
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent/60 hover:text-foreground"
         >
-          <LogOut size={20} />
-          Logout
+          <LogOut className="h-[18px] w-[18px]" />
+          Đăng xuất
         </button>
       </div>
     </aside>

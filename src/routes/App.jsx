@@ -21,6 +21,9 @@ import { PrivateRoute, PublicOnlyRoute } from "./ProtectedRoute";
 import MyVoucher from "@/components/account/MyVoucher";
 import StaffLayout from "@/pages/layout/StaffLayout";
 import StaffHome from "@/pages/StaffHome";
+import StaffOrder from "@/pages/StaffOrder";
+import StaffProduct from "@/pages/StaffProduct";
+import StaffIngredient from "@/pages/StaffIngredient";
 
 function App() {
   return (
@@ -79,15 +82,19 @@ function App() {
         </Route>
 
         <Route
-          path="/staff/*"
+          path="/staff"
           element={
             <PrivateRoute roles={["STAFF"]}>
               <StaffLayout />
             </PrivateRoute>
           }
         >
+          s
           <Route index element={<StaffHome />} />
-          {/* <Route path="orders" element={<StaffOrders />} /> */}
+          <Route path="orders" element={<StaffOrder />} />
+          <Route path="products" element={<StaffProduct />} />
+          <Route path="ingredients" element={<StaffIngredient />} />
+          {/* <Route path="bill" element={<PrintBill />} /> */}
         </Route>
         {/* Route không tồn tại */}
         <Route path="*" element={<Notfound />} />
