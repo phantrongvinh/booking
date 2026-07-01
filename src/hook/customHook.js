@@ -147,7 +147,6 @@ export const useSubmit = (apiFn, options = {}) => {
         if (!isMountedRef.current) return;
         setError(err);
         onError?.(err, payload);
-        throw err;
       } finally {
         if (isMountedRef.current) {
           setLoading(false);
