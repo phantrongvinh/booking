@@ -11,8 +11,8 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
-import debounce from "lodash/debounce";
 import productAPI from "../../api/productAPI";
+import { debounce } from "lodash";
 const navItems = [
   { label: "Trang chủ", to: "/" },
   { label: "Thực đơn", to: "/menu" },
@@ -25,32 +25,32 @@ export default function Header() {
   const { isLoggedIn, isAdmin, isStaff } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-const [keyword, setKeyword] = useState("");
-const [products, setProducts] = useState([]);
+  const [keyword, setKeyword] = useState("");
+  const [products, setProducts] = useState([]);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-const searchProduct = useMemo(
-  () =>
-    debounce(async (value) => {
-      if (!value.trim()) {
-        setProducts([]);
-        return;
-      }
+  const searchProduct = useMemo(
+    () =>
+      debounce(async (value) => {
+        if (!value.trim()) {
+          setProducts([]);
+          return;
+        }
 
-      try {
-        const data = await productAPI.fetchProductBySearch(value);
-        setProducts(data);
-      } catch (error) {
-        console.error(error);
-      }
-    }, 300),
-  []
-);
-useEffect(() => {
-  return () => {
-    searchProduct.cancel();
-  };
-}, [searchProduct]);
+        try {
+          const data = await productAPI.fetchProductBySearch(value);
+          setProducts(data);
+        } catch (error) {
+          console.error(error);
+        }
+      }, 300),
+    [],
+  );
+  useEffect(() => {
+    return () => {
+      searchProduct.cancel();
+    };
+  }, [searchProduct]);
   // Click outside để đóng dropdown
   useEffect(() => {
     const handler = (e) => {
@@ -69,12 +69,12 @@ useEffect(() => {
   useEffect(() => {
     console.log(isLoggedIn);
   });
-const handleSearch = (e) => {
-  const value = e.target.value;
-  setKeyword(value);
+  const handleSearch = (e) => {
+    const value = e.target.value;
+    setKeyword(value);
 
-  searchProduct(value);
-};
+    searchProduct(value);
+  };
 
   const {
     data: { user },
@@ -130,46 +130,46 @@ const handleSearch = (e) => {
             <div className="flex items-center justify-end gap-4 shrink-0">
               {/* Chỉnh max-w-[250px] thành giá trị lớn hơn để ô dài ra */}
               <div className="relative w-full max-w-[300px]">
-<input
-  type="text"
-  placeholder="Tìm kiếm..."
-  value={keyword}
-  onChange={handleSearch}
-  className="w-full h-9 rounded-full bg-white pl-5 pr-12 text-sm text-[#2B1B12] border border-[#F3D7A1] focus:outline-none"
-/>
-<Search
-  size={18}
-  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#2B1B12]"
-/>
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm..."
+                  value={keyword}
+                  onChange={handleSearch}
+                  className="w-full h-9 rounded-full bg-white pl-5 pr-12 text-sm text-[#2B1B12] border border-[#F3D7A1] focus:outline-none"
+                />
+                <Search
+                  size={18}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#2B1B12]"
+                />
 
-{products.length > 0 && (
-  <div className="absolute top-full left-0 mt-1 w-full bg-white border rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
-    {products.map((item) => (
-      <div
-        key={item.productId}
-        onClick={() => {
-          setKeyword("");
-          setProducts([]);
-          navigate(`/product/${item.productId}`);
-        }}
-        className="flex items-center gap-3 p-2 hover:bg-gray-100 cursor-pointer"
-      >
-        <img
-          src={item.imageUrl}
-          alt={item.name}
-          className="w-12 h-12 object-cover rounded"
-        />
+                {products.length > 0 && (
+                  <div className="absolute top-full left-0 mt-1 w-full bg-white border rounded-lg shadow-lg z-50 max-h-72 overflow-y-auto">
+                    {products.map((item) => (
+                      <div
+                        key={item.productId}
+                        onClick={() => {
+                          setKeyword("");
+                          setProducts([]);
+                          navigate(`/product/${item.productId}`);
+                        }}
+                        className="flex items-center gap-3 p-2 hover:bg-gray-100 cursor-pointer"
+                      >
+                        <img
+                          src={item.imageUrl}
+                          alt={item.name}
+                          className="w-12 h-12 object-cover rounded"
+                        />
 
-        <div>
-          <p className="font-medium">{item.name}</p>
-          <p className="text-sm text-orange-500">
-            {item.price.toLocaleString()}₫
-          </p>
-        </div>
-      </div>
-    ))}
-  </div>
-)}
+                        <div>
+                          <p className="font-medium">{item.name}</p>
+                          <p className="text-sm text-orange-500">
+                            {item.price.toLocaleString()}₫
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-3">

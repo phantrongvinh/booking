@@ -14,6 +14,30 @@ export const fetchOrder = createAsyncThunk(
   },
 );
 
+export const getOrderById = createAsyncThunk(
+  "order/getById",
+  async (id, { rejectWithValue }) => {
+    try {
+      const res = await orderAPI.fetchOrderById(id);
+      return res;
+    } catch (error) {
+      return rejectWithValue("Không tìm thấy đơn hàng");
+    }
+  },
+);
+
+export const updateOrderStatus = createAsyncThunk(
+  "order/updateStatus",
+  async ({ orderId, newStatus, note }, { rejectWithValue }) => {
+    try {
+      const res = await orderAPI.updateOrderStatus(orderId, newStatus, note);
+      return res;
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message);
+    }
+  },
+);
+
 const orderSlice = createSlice({
   name: "order",
   initialState: {
@@ -21,6 +45,7 @@ const orderSlice = createSlice({
     loading: false,
     error: null,
     message: null,
+    order: null,
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -37,6 +62,27 @@ const orderSlice = createSlice({
       .addCase(fetchOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = "Không có đơn hàng";
+      })
+      .addCase(getOrderById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getOrderById.fulfilled, (state, action) => {
+        state.order = action.payload.data;
+        state.loading = false;
+        state.message = action.payload.message;
+      })
+      .addCase(getOrderById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = "Không có đơn hàng";
+      })
+      .addCase(updateOrderStatus.fulfilled, (state, action) => {
+        state.loading = false;
+        state.message = action.payload.message;
+      })
+      .addCase(updateOrderStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
       });
   },
 });

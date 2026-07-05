@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useMemo } from "react";
-import { useSelector } from "react-redux";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Select,
   SelectContent,
@@ -11,21 +11,130 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search } from "lucide-react";
+import { Printer, Search } from "lucide-react";
+import {
+  fetchOrder,
+  getOrderById,
+  updateOrderStatus,
+} from "@/store/slices/orderSlice";
+import { useFetch, useSubmit } from "@/hook/customHook";
+import ulti from "@/ultis/ulti";
+import { Button } from "@/components/ui/button";
+import StatusBadge from "@/components/staff/StatusBadge";
 
 const StaffOrder = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+
+  const { error } = useSelector((state) => state.order);
+
   const { id } = useParams();
 
-  const { orders } = useSelector((state) => state.order);
+  const {
+    data: { orders },
+    loading,
+    fetch: reloadList,
+  } = useFetch(
+    async () => {
+      const res = await dispatch(fetchOrder()).unwrap();
+      const orders = res.data;
+      return {
+        orders,
+      };
+    },
+    { initialData: { orders: [] } },
+  );
 
-  const selected = useMemo(() => {
-    return orders?.find((o) => String(o.id) === id);
-  }, [id, orders]);
+  // filter orders
+  const [query, setQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
 
+  const filteredOrders = orders?.filter((order) => {
+    const matchStatus =
+      selectedStatus === "all" || order.status === selectedStatus;
+
+    const keyword = query.trim().toLowerCase();
+
+    const matchSearch =
+      String(order.orderId).includes(keyword) ||
+      (order.customerName ?? order.user?.fullName ?? "")
+        .toLowerCase()
+        .includes(keyword) ||
+      (order.shippingAddress ?? "").toLowerCase().includes(keyword);
+
+    return matchStatus && matchSearch;
+  });
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 10;
+
+  const totalPages = Math.ceil((filteredOrders?.length || 0) / pageSize);
+
+  const currentOrders = filteredOrders?.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize,
+  );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, selectedStatus]);
+
+  // xem chi tiết
+  const {
+    data: { order } = {},
+    loading: orderLoading,
+    fetch: reloadOrder,
+  } = useFetch(
+    async () => {
+      if (!id) {
+        return { order: null };
+      }
+
+      const res = await dispatch(getOrderById(id)).unwrap();
+
+      return { order: res.data };
+    },
+    {
+      initialData: {
+        order: null,
+      },
+    },
+  );
+
+  const closeDialog = () => {
+    navigate("/staff/orders");
+  };
+
+  // cập nhật trạng thái
+  const statusOptions = [
+    { value: "1", label: "Đang làm" },
+    { value: "2", label: "Đang giao" },
+    { value: "3", label: "Hoàn thành" },
+  ];
+
+  const [note, setNote] = useState("");
+
+  const { submit: updateStatus, loading: updating } = useSubmit(
+    ({ orderId, newStatus }) => {
+      dispatch(updateOrderStatus({ orderId, newStatus, note: note })).unwrap();
+    },
+    {
+      onSuccess: () => {
+        reloadList();
+        reloadOrder();
+      },
+    },
+  );
+
+  // in hóa đơn
+  const handlePrint = () => {
+    window.print();
+  };
   return (
     <>
       <div className="mb-6">
@@ -39,20 +148,23 @@ const StaffOrder = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
               placeholder="Tìm sản phẩm…"
               className="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none focus:border-ring focus:ring-1 focus:ring-ring"
             />
           </div>
 
-          <Select>
+          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
             <SelectTrigger className="w-full h-10 sm:w-48">
               <SelectValue placeholder="Trạng thái" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="w-[var(--radix-select-trigger-width)]">
               <SelectItem value="all">Tất cả trạng thái</SelectItem>
-              <SelectItem value="dang-xu-ly">Đang xử lý</SelectItem>
-              <SelectItem value="hoan-thanh">Hoàn thành</SelectItem>
-              <SelectItem value="da-huy">Đã hủy</SelectItem>
+              <SelectItem value="Chờ xác nhận">Chờ xác nhận</SelectItem>
+              <SelectItem value="Đang xử lý">Đang xử lý</SelectItem>
+              <SelectItem value="Hoàn thành">Hoàn thành</SelectItem>
+              <SelectItem value="Đã hủy">Đã hủy</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -71,84 +183,260 @@ const StaffOrder = () => {
             </thead>
 
             <tbody>
-              {orders?.map((o) => (
-                <tr key={o.id} className="border-t hover:bg-muted/30">
-                  <td className="px-5 py-3 font-semibold">{o.id}</td>
-                  <td className="px-5 py-3">
-                    <div>{o.customer}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {o.phone}
-                    </div>
-                  </td>
-                  <td className="px-5 py-3">{formatVND(o.total)}</td>
-                  <td className="px-5 py-3">
-                    {/* <OrderStatusBadge status={o.status} /> */}
-                  </td>
-                  <td className="px-5 py-3 text-muted-foreground">
-                    {o.createdAt}
-                  </td>
-                  <td className="px-5 py-3 text-right">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => navigate(`/orders/${o.id}`)}
-                    >
-                      Chi tiết
-                    </Button>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className=" py-8  text-center">
+                    Loading...
                   </td>
                 </tr>
-              ))}
+              ) : currentOrders?.length === 0 ? (
+                <tr className="">
+                  <td
+                    colSpan={6}
+                    className=" py-8  text-center text-muted-foreground"
+                  >
+                    Không tìm thấy đơn hàng.
+                  </td>
+                </tr>
+              ) : (
+                currentOrders?.map((o) => (
+                  <tr key={o.id} className="border-t hover:bg-muted/30">
+                    <td className="px-5 py-3 font-semibold">{o.orderId}</td>
+                    <td className="px-5 py-3">
+                      <div>{o.customer}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {o.phone}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3">
+                      {ulti.formatVND(o.totalPrice)}
+                    </td>
+                    <td className="px-5 py-3">{o.status}</td>
+                    <td className="px-5 py-3 text-muted-foreground">
+                      {ulti.formatDate(o.createdAt)}
+                    </td>
+                    <td className="px-5 py-3 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/staff/orders/${o.orderId}`)}
+                      >
+                        Chi tiết
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
+          <div className="flex items-center justify-between border-t p-4">
+            <span className="text-sm text-muted-foreground">
+              Hiển thị {(currentPage - 1) * pageSize + 1} -
+              {Math.min(currentPage * pageSize, filteredOrders?.length)}
+              {" / "}
+              {filteredOrders?.length} đơn hàng
+            </span>
+
+            <div className="flex items-center gap-2">
+              <button
+                className="rounded border px-3 py-1 disabled:opacity-50"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Trước
+              </button>
+
+              <span className="text-sm">
+                {currentPage} / {totalPages || 1}
+              </span>
+
+              <button
+                className="rounded border px-3 py-1 disabled:opacity-50"
+                disabled={currentPage === totalPages || totalPages === 0}
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Sau
+              </button>
+            </div>
+          </div>
         </div>
         {/* ================= DIALOG ================= */}
         <Dialog open={!!id} onOpenChange={(open) => !open && closeDialog()}>
-          <DialogContent className="sm:max-w-lg">
-            {!selected ? (
-              <div className="text-sm text-muted-foreground">
-                Không tìm thấy đơn hàng
-              </div>
+          <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+            {!order ? (
+              <div className="p-6 text-center">Đang tải...</div>
             ) : (
               <>
-                <DialogHeader>
-                  <DialogTitle>Đơn {selected.id}</DialogTitle>
+                <DialogHeader className="flex flex-row items-start justify-between">
+                  <div>
+                    <DialogTitle>Đơn hàng #{order.orderId}</DialogTitle>
+                    <DialogDescription>
+                      Tạo lúc {ulti.formatDateTime(order.createdAt)}
+                    </DialogDescription>
+                  </div>
                 </DialogHeader>
 
-                {/* ITEMS */}
-                <div className="rounded-xl border">
-                  {selected.items.map((it) => (
-                    <div
-                      key={it.id || it.productName}
-                      className="flex justify-between border-b px-4 py-2 text-sm last:border-0"
-                    >
-                      <span>{it.productName}</span>
-                      <span className="text-muted-foreground">x{it.qty}</span>
+                {/* Thông tin đơn hàng */}
+                <div className="print-area">
+                  <div className="grid grid-cols-2 gap-4 rounded-lg border p-4 text-sm">
+                    <div>
+                      <p className="text-muted-foreground">Khách hàng</p>
+                      <p className="font-medium">User #{order.userId}</p>
                     </div>
-                  ))}
+
+                    <div>
+                      <p className="text-muted-foreground">SĐT</p>
+                      <p className="font-medium">{order.phone}</p>
+                    </div>
+
+                    <div className="col-span-2">
+                      <p className="text-muted-foreground">Địa chỉ giao hàng</p>
+                      <p>{order.shippingAddress}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-muted-foreground">Thanh toán</p>
+                      <p>{order.paymentMethod}</p>
+                    </div>
+
+                    <div>
+                      <p className="text-muted-foreground">Trạng thái</p>
+                      {order.status}
+                    </div>
+
+                    {order.note && (
+                      <div className="col-span-2">
+                        <p className="text-muted-foreground">Ghi chú</p>
+                        <p>{order.note}</p>
+                      </div>
+                    )}
+
+                    {order.cancelReason && (
+                      <div className="col-span-2 rounded-lg bg-red-50 p-3 text-red-600">
+                        <strong>Lý do hủy:</strong> {order.cancelReason}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Danh sách sản phẩm */}
+                  <div>
+                    <h3 className="mb-2 font-semibold">Sản phẩm</h3>
+
+                    <div className="rounded-lg border overflow-hidden">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted">
+                          <tr>
+                            <th className="px-4 py-2 text-left">Sản phẩm</th>
+                            <th className="px-4 py-2 text-center">SL</th>
+                            <th className="px-4 py-2 text-right">Đơn giá</th>
+                            <th className="px-4 py-2 text-right">Thành tiền</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {order.items.map((item) => (
+                            <tr key={item.productId} className="border-t">
+                              <td className="px-4 py-2">{item.productName}</td>
+
+                              <td className="px-4 py-2 text-center">
+                                {item.quantity}
+                              </td>
+
+                              <td className="px-4 py-2 text-right">
+                                {ulti.formatVND(item.unitPrice)}
+                              </td>
+
+                              <td className="px-4 py-2 text-right font-medium">
+                                {ulti.formatVND(item.totalPrice)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+
+                  {/* Tổng tiền */}
+                  <div className="flex items-center justify-between rounded-lg bg-muted p-4">
+                    <span className="font-medium">Tổng thanh toán</span>
+
+                    <span className="text-xl font-bold text-primary">
+                      {ulti.formatVND(order.totalPrice)}
+                    </span>
+                  </div>
+                </div>
+                {/* Lịch sử trạng thái */}
+                <div>
+                  <h3 className="mb-2 font-semibold">Lịch sử trạng thái</h3>
+
+                  <div className="space-y-3">
+                    {order.statusHistory.map((history, index) => (
+                      <div
+                        key={index}
+                        className="rounded-lg border p-3 text-sm"
+                      >
+                        <div className="flex justify-between">
+                          <span className="font-medium">{history.status}</span>
+
+                          <span className="text-muted-foreground">
+                            {ulti.formatDateTime(history.changedAt)}
+                          </span>
+                        </div>
+
+                        <div className="text-muted-foreground mt-1">
+                          {history.changedByUserName}
+                        </div>
+
+                        {history.note && (
+                          <div className="mt-1 italic">{history.note}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
-                {/* TOTAL */}
-                <div className="flex justify-between rounded-xl bg-muted/50 px-4 py-3">
-                  <span>Tổng tiền</span>
-                  <span className="font-semibold">
-                    {formatVND(selected.total)}
-                  </span>
-                </div>
+                {/* Cập nhật trạng thái */}
+                <div className="space-y-2">
+                  <div className="text-sm font-medium mb-2">
+                    Cập nhật trạng thái
+                  </div>
 
-                {/* STATUS UPDATE */}
-                <Select
-                  value={selected.status}
-                  onValueChange={(v) => updateStatus(selected.id, v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="dang-xu-ly">Đang xử lý</SelectItem>
-                    <SelectItem value="hoan-thanh">Hoàn thành</SelectItem>
-                    <SelectItem value="da-huy">Đã hủy</SelectItem>
-                  </SelectContent>
-                </Select>
+                  <Select
+                    onValueChange={(value) =>
+                      updateStatus({
+                        orderId: order.orderId,
+                        newStatus: Number(value),
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Cập nhật trạng thái" />
+                    </SelectTrigger>
+
+                    <SelectContent className="w-[var(--radix-select-trigger-width)]">
+                      {statusOptions.map((item) => (
+                        <SelectItem key={item.value} value={item.value}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <input
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    placeholder="Ghi chú..."
+                    className="border rounded-lg p-2 text-sm w-full"
+                  />
+                  {error && (
+                    <p className="text-sm text-red-500">
+                      {error.message || error}
+                    </p>
+                  )}
+                </div>
+                <Button variant="outline" onClick={handlePrint}>
+                  <Printer className="mr-2 h-4 w-4" />
+                  In hóa đơn
+                </Button>
               </>
             )}
           </DialogContent>

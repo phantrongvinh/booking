@@ -1,4 +1,4 @@
-import userAPI from "@/api/userApi";
+import userAPI from "@/api/userAPI";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const fetchMe = createAsyncThunk(

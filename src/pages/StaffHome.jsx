@@ -1,12 +1,17 @@
-import { Banknote, Cake, ShoppingBag, Wallet, Wheat } from "lucide-react";
-import StaffLayout from "./layout/StaffLayout";
+import {
+  Banknote,
+  Cake,
+  Printer,
+  ShoppingBag,
+  Wallet,
+  Wheat,
+} from "lucide-react";
 import StatCard from "@/components/staff/StatCard";
 import { Link } from "react-router-dom";
 import { useFetch } from "@/hook/customHook";
 import { useDispatch } from "react-redux";
 import { fetchOrder } from "@/store/slices/orderSlice";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import ulti from "@/ultis/ulti";
 
 const StaffHome = () => {
   const dispatch = useDispatch();
@@ -25,10 +30,14 @@ const StaffHome = () => {
     },
   );
 
-  const recent = orders
+  // recent orders
+  const recent = [...orders]
+    ?.filter((o) => o.status === "Chờ xác nhận")
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
+  // user
+  const userName = "";
   return (
     <>
       <div className="mb-6">
@@ -103,9 +112,9 @@ const StaffHome = () => {
                 <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
                   Ngày tạo
                 </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
+                {/* <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
                   Thao tác
-                </th>
+                </th> */}
               </tr>
             </thead>
 
@@ -150,14 +159,12 @@ const StaffHome = () => {
                     {/* Tổng tiền */}
                     <td className="px-6 py-4 text-right">
                       <span className="font-bold text-orange-600">
-                        {formatVND(order.totalPrice)}
+                        {ulti.formatVND(order.totalPrice)}
                       </span>
                     </td>
 
                     {/* Trạng thái */}
-                    <td className="px-6 py-4 text-center">
-                      <OrderStatusBadge status={order.status} />
-                    </td>
+                    <td className="px-6 py-4 text-center">{order.status}</td>
 
                     {/* Ngày tạo */}
                     <td className="px-6 py-4 text-center">
@@ -167,7 +174,7 @@ const StaffHome = () => {
                     </td>
 
                     {/* Thao tác */}
-                    <td className="px-6 py-4 text-center">
+                    {/* <td className="px-6 py-4 text-center">
                       <Button
                         asChild
                         size="sm"
@@ -181,7 +188,7 @@ const StaffHome = () => {
                           <Printer className="mr-1 h-4 w-4" /> In phiếu
                         </Link>
                       </Button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))
               ) : (
