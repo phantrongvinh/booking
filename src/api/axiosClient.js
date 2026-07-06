@@ -2,7 +2,6 @@ import axios from "axios";
 
 const axiosClient = axios.create({
   baseURL: "https://bookingbakery.onrender.com/api",
-  timeout: 5000,
   responseType: "json",
   headers: {
     "Content-Type": "application/json",
@@ -31,8 +30,17 @@ axiosClient.interceptors.response.use(
     }
 
     const status = error.response?.status;
+    console.log(
+      "[Interceptor] URL:",
+      requestUrl,
+      "Status:",
+      status,
+      "Data:",
+      error.response?.data,
+    );
     if (status === 401) {
       localStorage.removeItem("token");
+      localStorage.removeItem("roleId");
       window.location.href = "/auth";
     } else if (status === 403) {
       window.location.href = "/forbidden";

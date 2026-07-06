@@ -26,11 +26,19 @@ const fetchProductBySearch = async (name) => {
   return data;
 };
 
+const createProduct = async (formData) => {
+  const res = await axiosClient.post(url, formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return res.data;
+};
+
 const productAPI = {
   fetchProduct,
   fetchProductById,
   fetchProductByCategory,
   fetchProductBySearch,
+  createProduct,
 };
 
 export default productAPI;

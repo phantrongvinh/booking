@@ -24,7 +24,6 @@ import {
 import { useFetch, useSubmit } from "@/hook/customHook";
 import ulti from "@/ultis/ulti";
 import { Button } from "@/components/ui/button";
-import StatusBadge from "@/components/staff/StatusBadge";
 
 const StaffOrder = () => {
   const navigate = useNavigate();
@@ -85,6 +84,8 @@ const StaffOrder = () => {
   }, [query, selectedStatus]);
 
   // xem chi tiết
+  const [selectedStatusOrder, setSelectedStatusOrder] = useState("");
+
   const {
     data: { order } = {},
     loading: orderLoading,
@@ -120,21 +121,33 @@ const StaffOrder = () => {
   const [note, setNote] = useState("");
 
   const { submit: updateStatus, loading: updating } = useSubmit(
-    ({ orderId, newStatus }) => {
-      dispatch(updateOrderStatus({ orderId, newStatus, note: note })).unwrap();
+    async ({ orderId, newStatus, note }) => {
+      await dispatch(updateOrderStatus({ orderId, newStatus, note })).unwrap();
     },
     {
       onSuccess: () => {
         reloadList();
         reloadOrder();
+        setNote("");
+        setSelectedStatusOrder("");
       },
     },
   );
+
+  const handleSubmit = () => {
+    if (!selectedStatus) return;
+    updateStatus({
+      orderId: order.orderId,
+      newStatus: Number(selectedStatus),
+      note,
+    });
+  };
 
   // in hóa đơn
   const handlePrint = () => {
     window.print();
   };
+
   return (
     <>
       <div className="mb-6">
@@ -176,8 +189,8 @@ const StaffOrder = () => {
                 <th className="px-5 py-3">Mã đơn</th>
                 <th className="px-5 py-3">Khách hàng</th>
                 <th className="px-5 py-3">Tổng tiền</th>
-                <th className="px-5 py-3">Trạng thái</th>
-                <th className="px-5 py-3">Thời gian</th>
+                <th className="px-5 py-3 text-center">Trạng thái</th>
+                <th className="px-5 py-3 text-center">Thời gian</th>
                 <th className="px-5 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -203,7 +216,7 @@ const StaffOrder = () => {
                   <tr key={o.id} className="border-t hover:bg-muted/30">
                     <td className="px-5 py-3 font-semibold">{o.orderId}</td>
                     <td className="px-5 py-3">
-                      <div>{o.customer}</div>
+                      <div>{o.customerName}</div>
                       <div className="text-xs text-muted-foreground">
                         {o.phone}
                       </div>
@@ -211,8 +224,23 @@ const StaffOrder = () => {
                     <td className="px-5 py-3">
                       {ulti.formatVND(o.totalPrice)}
                     </td>
-                    <td className="px-5 py-3">{o.status}</td>
-                    <td className="px-5 py-3 text-muted-foreground">
+                    <td className="px-5 py-3 text-center">
+                      {" "}
+                      <span
+                        className={`inline-flex  items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                          o.status === "Đang làm"
+                            ? "bg-blue-100 text-blue-700"
+                            : o.status === "Đang giao"
+                              ? "bg-yellow-100 text-yellow-700"
+                              : o.status === "Hoàn thành"
+                                ? "bg-green-100 text-green-700"
+                                : "bg-gray-100 text-gray-500"
+                        }`}
+                      >
+                        {o.status}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3 text-muted-foreground text-center">
                       {ulti.formatDate(o.createdAt)}
                     </td>
                     <td className="px-5 py-3 text-right">
@@ -281,7 +309,7 @@ const StaffOrder = () => {
                   <div className="grid grid-cols-2 gap-4 rounded-lg border p-4 text-sm">
                     <div>
                       <p className="text-muted-foreground">Khách hàng</p>
-                      <p className="font-medium">User #{order.userId}</p>
+                      <p className="font-medium">{order.customerName}</p>
                     </div>
 
                     <div>
@@ -402,11 +430,11 @@ const StaffOrder = () => {
                   </div>
 
                   <Select
-                    onValueChange={(value) =>
-                      updateStatus({
-                        orderId: order.orderId,
-                        newStatus: Number(value),
-                      })
+                    value={selectedStatusOrder}
+                    onValueChange={setSelectedStatusOrder}
+                    disabled={
+                      order.statusHistory[order.statusHistory.length - 1]
+                        .status === "Hoàn thành"
                     }
                   >
                     <SelectTrigger>
@@ -421,17 +449,40 @@ const StaffOrder = () => {
                       ))}
                     </SelectContent>
                   </Select>
+
                   <input
                     value={note}
                     onChange={(e) => setNote(e.target.value)}
                     placeholder="Ghi chú..."
                     className="border rounded-lg p-2 text-sm w-full"
+                    disabled={
+                      order.statusHistory[order.statusHistory.length - 1]
+                        .status === "Hoàn thành"
+                    }
                   />
+
                   {error && (
                     <p className="text-sm text-red-500">
                       {error.message || error}
                     </p>
                   )}
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={
+                      !selectedStatusOrder ||
+                      updating ||
+                      order.statusHistory[order.statusHistory.length - 1]
+                        .status === "Hoàn thành"
+                    }
+                    className="w-full border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00] hover:text-[#FFF]"
+                  >
+                    {order.statusHistory[order.statusHistory.length - 1]
+                      .status === "Hoàn thành"
+                      ? "Đã hoàn thành "
+                      : updating
+                        ? "Đang cập nhật..."
+                        : "Xác nhận cập nhật"}
+                  </Button>
                 </div>
                 <Button variant="outline" onClick={handlePrint}>
                   <Printer className="mr-2 h-4 w-4" />

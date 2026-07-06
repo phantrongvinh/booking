@@ -33,7 +33,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
-        {/* Không dùng layout */}
+        {/* Không dùng layout — chỉ chặn user ĐÃ đăng nhập quay lại */}
         <Route
           path="/auth"
           element={
@@ -52,18 +52,17 @@ function App() {
         />
         <Route path="/verify-otp" element={<VerifyOtp />} />
 
-        {/* Dùng layout */}
+        {/* Dùng layout — MỞ CHO TẤT CẢ, không cần PublicOnlyRoute */}
         <Route element={<MainLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/menu/:productId" element={<ProductDetail />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogDetail />} />
-          <Route path="/profile" element={<Profile />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/checkout" element={<Checkout />} />
 
-          {/* Account route layout */}
+          {/* Account route layout — CẦN đăng nhập */}
           <Route
             path="/account"
             element={
@@ -78,30 +77,34 @@ function App() {
             <Route path="orders" element={<Order />} />
             <Route path="address" element={<Addresses />} />
             <Route path="voucher" element={<MyVoucher />} />
-
-            {/*<Route path="favorites" element={<Favorites />} />
-            <Route path="change-password" element={<ChangePassword />} />  */}
           </Route>
         </Route>
 
+        {/* Staff routes — chỉ role STAFF hoặc ADMIN */}
         <Route
           path="/staff"
           element={
-            <PrivateRoute roles={["STAFF"]}>
+            <PrivateRoute roles={["STAFF", "ADMIN"]}>
               <StaffLayout />
             </PrivateRoute>
           }
         >
-          s
           <Route index element={<StaffHome />} />
           <Route path="orders" element={<StaffOrder />} />
           <Route path="orders/:id" element={<StaffOrder />} />
           <Route path="products" element={<StaffProduct />} />
           <Route path="ingredients" element={<StaffIngredient />} />
-          {/* <Route path="bill" element={<PrintBill />} /> */}
         </Route>
-        {/* Admin routes */}
-        <Route path="/admin" element={<StaffLayout />}>
+
+        {/* Admin routes — CẦN bảo vệ bằng PrivateRoute */}
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute roles={["ADMIN"]}>
+              <StaffLayout />
+            </PrivateRoute>
+          }
+        >
           <Route path="aduser" element={<AdUser />} />
           <Route path="adstaff" element={<AdStaff />} />
           <Route path="adorder" element={<AdOrder />} />
