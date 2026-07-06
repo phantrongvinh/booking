@@ -1,4 +1,5 @@
 import StatusBadge from "@/components/staff/StatusBadge";
+import StockCheckDialog from "@/components/staff/StockCheckDialog";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,6 +21,7 @@ const StaffIngredient = () => {
   const {
     data: { ingredients },
     loading,
+    fetch: reloadList,
   } = useFetch(
     async () => {
       const ingredients = await dispatch(fetchAllIngredient()).unwrap();
@@ -126,10 +128,16 @@ const StaffIngredient = () => {
                 currentIngredient?.map((i) => (
                   <tr
                     key={i.id}
-                    className="border-t hover:bg-muted/30 cursor-pointer"
+                    className={`border-t cursor-pointer transition-colors ${
+                      i.currentStock <= 0
+                        ? "bg-red-50 hover:bg-red-100"
+                        : i.currentStock <= 10
+                          ? "bg-yellow-50 hover:bg-yellow-100"
+                          : "hover:bg-muted/30"
+                    }`}
                   >
                     <td className="px-5 py-3 font-semibold">
-                      {i.ingredientId}
+                      #{i.ingredientId}
                     </td>
 
                     <td className="px-5 py-3">
@@ -157,14 +165,29 @@ const StaffIngredient = () => {
                     </td>
 
                     <td className="px-5 py-3 ">
-                      <StatusBadge status={i.status} />
+                      <span
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                          i.currentStock <= 0
+                            ? "bg-red-100 text-red-600"
+                            : i.currentStock <= 10
+                              ? "bg-yellow-100 text-yellow-700"
+                              : "bg-green-100 text-green-700"
+                        }`}
+                      >
+                        {i.currentStock <= 0
+                          ? "Hết hàng"
+                          : i.currentStock <= 10
+                            ? "Sắp hết"
+                            : "Còn hàng"}
+                      </span>
                     </td>
 
-                    <td className="px-5 py-3 ">
+                    <td className="px-5 py-3">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <ClipboardList className="h-4 w-4 text-blue-600" />
-                        </Button>
+                        <StockCheckDialog
+                          ingredient={i}
+                          onSuccess={reloadList} // đổi thành tên hàm reload thật của bạn
+                        />
                       </div>
                     </td>
                   </tr>

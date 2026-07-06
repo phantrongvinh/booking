@@ -17,7 +17,6 @@ const navItems = [
   // { to: "/don-xu-ly", label: "Đơn xử lý", icon: ClipboardList },
   { to: "/staff/products", label: "Sản phẩm", icon: Cake, end: true },
   { to: "/staff/ingredients", label: "Nguyên liệu", icon: Wheat, end: true },
-  { to: "/staff/bill", label: "In phiếu chế biến", icon: Printer, end: true },
 ];
 
 const StaffSideBar = ({ onNavigate }) => {

@@ -86,7 +86,10 @@ const Home = () => {
                 </div>
               ) : (
                 productBestSale.map((value) => (
-                  <div className="basis-[calc(25%-12px)]" key={value.id}>
+                  <div
+                    className="basis-[calc(25%-12px)] shrink-0 flex"
+                    key={value.id}
+                  >
                     <ProductList data={value} key={value.id}></ProductList>
                   </div>
                 ))

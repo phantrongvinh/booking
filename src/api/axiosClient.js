@@ -30,6 +30,14 @@ axiosClient.interceptors.response.use(
     }
 
     const status = error.response?.status;
+    console.log(
+      "[Interceptor] URL:",
+      requestUrl,
+      "Status:",
+      status,
+      "Data:",
+      error.response?.data,
+    );
     if (status === 401) {
       localStorage.removeItem("token");
       localStorage.removeItem("roleId");

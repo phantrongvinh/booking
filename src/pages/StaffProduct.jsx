@@ -6,13 +6,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
 import { useFetch } from "@/hook/customHook";
 import { fetchAllCategory } from "@/store/slices/categorySlice";
 import { fetchAllProduct } from "@/store/slices/productSlice";
 import ulti from "@/ultis/ulti";
 import { Search } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +23,7 @@ const StaffProduct = () => {
   const {
     data: { products, categories },
     loading,
+    fetch: reloadProducts,
   } = useFetch(
     async () => {
       const res = await Promise.allSettled([
@@ -98,7 +98,7 @@ const StaffProduct = () => {
               <SelectTrigger className="h-10 w-full sm:w-52">
                 <SelectValue placeholder="Danh mục" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)]">
                 <SelectItem value="all">Tất cả</SelectItem>
                 {categories?.map((item) => (
                   <SelectItem
@@ -124,6 +124,15 @@ const StaffProduct = () => {
               </SelectContent>
             </Select>
           </div>
+          {/* <CreatProductDialog
+            trigger={
+              <Button className="bg-[#FF7A00] text-white hover:bg-[#FF7A00]/90 h-10 w-full sm:w-44">
+                <Plus className="mr-1 h-4 w-4" />
+                Thêm sản phẩm
+              </Button>
+            }
+            onSuccess={reloadProducts}
+          /> */}
         </div>
 
         {/* TABLE */}
