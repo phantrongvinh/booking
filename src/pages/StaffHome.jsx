@@ -11,7 +11,10 @@ import { Link } from "react-router-dom";
 import { useFetch } from "@/hook/customHook";
 import { useDispatch } from "react-redux";
 import { fetchOrder } from "@/store/slices/orderSlice";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import ulti from "@/ultis/ulti";
+import { Printer } from "lucide-react";
 
 const StaffHome = () => {
   const dispatch = useDispatch();
