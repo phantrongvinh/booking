@@ -33,6 +33,7 @@ axiosClient.interceptors.response.use(
     const status = error.response?.status;
     if (status === 401) {
       localStorage.removeItem("token");
+      localStorage.removeItem("roleId");
       window.location.href = "/auth";
     } else if (status === 403) {
       window.location.href = "/forbidden";

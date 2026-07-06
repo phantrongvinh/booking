@@ -80,6 +80,7 @@ const Profile = () => {
     handleSubmit,
     setValue,
     control,
+    fetch: reloadUser,
     formState: { errors, isDirty },
   } = useForm({
     resolver: yupResolver(schema),
@@ -94,22 +95,29 @@ const Profile = () => {
     },
   });
 
-  const { submit, loading } = useSubmit((data) => {
-    if (!isDirty) {
-      console.log("không thay đổi");
-      return;
-    }
-    const payload = {
-      fullName: data.fullName,
-      birthday: data.birthday ? dayjs(data.birthday).toISOString() : null,
-      gender: data.gender,
-      address: data.address,
-      avatarUrl: data.avatarUrl || null,
-      phone: data.phone,
-    };
+  const { submit, loading } = useSubmit(
+    (data) => {
+      if (!isDirty) {
+        console.log("không thay đổi");
+        return;
+      }
+      const payload = {
+        fullName: data.fullName,
+        birthday: data.birthday ? dayjs(data.birthday).toISOString() : null,
+        gender: data.gender,
+        address: data.address,
+        avatarUrl: data.avatarUrl || null,
+        phone: data.phone,
+      };
 
-    return dispatch(updateProfile(payload)).unwrap();
-  });
+      return dispatch(updateProfile(payload)).unwrap();
+    },
+    {
+      onSuccess: () => {
+        reLoadUser();
+      },
+    },
+  );
 
   // handle clear message
   useEffect(() => {

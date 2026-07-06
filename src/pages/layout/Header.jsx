@@ -66,9 +66,6 @@ export default function Header() {
     navigate("/");
   };
 
-  useEffect(() => {
-    console.log(isLoggedIn);
-  });
   const handleSearch = (e) => {
     const value = e.target.value;
     setKeyword(value);
