@@ -53,7 +53,13 @@ function App() {
         <Route path="/verify-otp" element={<VerifyOtp />} />
 
         {/* Dùng layout */}
-        <Route element={<MainLayout />}>
+        <Route
+          element={
+            <PublicOnlyRoute>
+              <MainLayout />
+            </PublicOnlyRoute>
+          }
+        >
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/menu/:productId" element={<ProductDetail />} />

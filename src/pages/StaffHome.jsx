@@ -14,7 +14,6 @@ import { fetchOrder } from "@/store/slices/orderSlice";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import ulti from "@/ultis/ulti";
-import { Printer } from "lucide-react";
 
 const StaffHome = () => {
   const dispatch = useDispatch();

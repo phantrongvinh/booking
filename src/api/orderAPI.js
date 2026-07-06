@@ -9,6 +9,7 @@ const fetchAllOrder = async () => {
 
 const createOrder = async (data) => {
   const res = await axiosClient.post(url, data);
+};
 const fetchOrderById = async (id) => {
   const res = await axiosClient.get(`${url}/${id}`);
   return res.data;
