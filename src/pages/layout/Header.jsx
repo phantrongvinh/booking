@@ -81,6 +81,7 @@ export default function Header() {
     loading,
   } = useFetch(
     async () => {
+      if (!isLoggedIn) return { user: null };
       const user = await dispatch(fetchMe()).unwrap();
       return { user };
     },
