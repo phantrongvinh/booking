@@ -1,5 +1,12 @@
 import StatusBadge from "@/components/staff/StatusBadge";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useFetch } from "@/hook/customHook";
 import { fetchAllIngredient } from "@/store/slices/ingredientSlice";
 import ulti from "@/ultis/ulti";
@@ -25,17 +32,25 @@ const StaffIngredient = () => {
   );
 
   // handle filter
+  // stock
+  const [stockFilter, setStockFilter] = useState("all");
+  // search
   const [query, setQuery] = useState("");
 
-  const filteredIngredient = useMemo(() => {
-    return ingredients.filter((item) =>
-      item.name.toLowerCase().includes(query.toLowerCase()),
-    );
-  }, [ingredients, query]);
+  const filteredIngredient = ingredients?.filter((item) => {
+    const matchSearch = item.name.toLowerCase().includes(query.toLowerCase());
+
+    const matchStock =
+      stockFilter === "all" ||
+      (stockFilter === "low" && item.currentStock < 10) ||
+      (stockFilter === "available" && item.currentStock >= 10);
+
+    return matchSearch && matchStock;
+  });
 
   // pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 5;
 
   const totalPages = Math.ceil((filteredIngredient?.length || 0) / pageSize);
 
@@ -45,8 +60,6 @@ const StaffIngredient = () => {
       currentPage * pageSize,
     );
   }, [filteredIngredient, currentPage]);
-
-  console.log(currentIngredient);
 
   return (
     <>
@@ -67,6 +80,16 @@ const StaffIngredient = () => {
               className="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none focus:border-ring focus:ring-1 focus:ring-ring"
             />
           </div>
+          <Select value={stockFilter} onValueChange={setStockFilter}>
+            <SelectTrigger className="w-full h-10 sm:w-48">
+              <SelectValue placeholder="Số lượng" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả</SelectItem>
+              <SelectItem value="low">Sắp hết</SelectItem>
+              <SelectItem value="available">Còn hàng</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="overflow-x-auto">
@@ -151,7 +174,7 @@ const StaffIngredient = () => {
           </table>
           <div className="flex items-center justify-between border-t p-4">
             <span className="text-sm text-muted-foreground">
-              Hiển thị {(currentPage - 1) * pageSize + 1} -
+              Hiển thị {(currentPage - 1) * pageSize + 1}-
               {Math.min(currentPage * pageSize, filteredIngredient?.length)}
               {" / "}
               {filteredIngredient?.length} sản phẩm
