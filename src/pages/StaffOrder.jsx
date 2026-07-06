@@ -1,5 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import {
   Select,
@@ -15,6 +15,9 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Search } from "lucide-react";
+import ulti from "@/ultis/ulti";
+import { Button } from "@/components/ui/button";
+import StatusBadge from "@/components/staff/StatusBadge";
 
 const StaffOrder = () => {
   const navigate = useNavigate();
@@ -73,17 +76,15 @@ const StaffOrder = () => {
             <tbody>
               {orders?.map((o) => (
                 <tr key={o.id} className="border-t hover:bg-muted/30">
-                  <td className="px-5 py-3 font-semibold">{o.id}</td>
+                  <td className="px-5 py-3 font-semibold">{o.orderId}</td>
                   <td className="px-5 py-3">
-                    <div>{o.customer}</div>
+                    <div>{o.customerName}</div>
                     <div className="text-xs text-muted-foreground">
                       {o.phone}
                     </div>
                   </td>
-                  <td className="px-5 py-3">{formatVND(o.total)}</td>
-                  <td className="px-5 py-3">
-                    {/* <OrderStatusBadge status={o.status} /> */}
-                  </td>
+                  <td className="px-5 py-3">{ulti.formatVND(o.totalPrice)}</td>
+                  <td className="px-5 py-3">{o.status}</td>
                   <td className="px-5 py-3 text-muted-foreground">
                     {o.createdAt}
                   </td>
@@ -91,7 +92,7 @@ const StaffOrder = () => {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => navigate(`/orders/${o.id}`)}
+                      onClick={() => navigate(`/orders/${o.orderId}`)}
                     >
                       Chi tiết
                     </Button>
