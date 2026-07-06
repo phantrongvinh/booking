@@ -117,7 +117,7 @@ const StaffProduct = () => {
                 <SelectValue placeholder="Trạng thái" />
               </SelectTrigger>
 
-              <SelectContent>
+              <SelectContent className="w-[var(--radix-select-trigger-width)]">
                 <SelectItem value="all">Tất cả</SelectItem>
                 <SelectItem value="stock">Còn hàng</SelectItem>
                 <SelectItem value="unstock">Hết hàng</SelectItem>

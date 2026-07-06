@@ -24,6 +24,9 @@ import StaffHome from "@/pages/StaffHome";
 import StaffOrder from "@/pages/StaffOrder";
 import StaffProduct from "@/pages/StaffProduct";
 import StaffIngredient from "@/pages/StaffIngredient";
+import AdUser from "@/pages/AdUser";
+import AdStaff from "@/pages/AdStaff";
+import AdOrder from "@/pages/AdOrder";
 
 function App() {
   return (
@@ -92,10 +95,18 @@ function App() {
           s
           <Route index element={<StaffHome />} />
           <Route path="orders" element={<StaffOrder />} />
+          <Route path="orders/:id" element={<StaffOrder />} />
           <Route path="products" element={<StaffProduct />} />
           <Route path="ingredients" element={<StaffIngredient />} />
           {/* <Route path="bill" element={<PrintBill />} /> */}
         </Route>
+        {/* Admin routes */}
+        <Route path="/admin" element={<StaffLayout />}>
+          <Route path="aduser" element={<AdUser />} />
+          <Route path="adstaff" element={<AdStaff />} />
+          <Route path="adorder" element={<AdOrder />} />
+        </Route>
+
         {/* Route không tồn tại */}
         <Route path="*" element={<Notfound />} />
       </Routes>

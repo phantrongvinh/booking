@@ -6,6 +6,30 @@ const formatVND = (amount) => {
     minimumFractionDigits: 0,
   }).format(amount);
 };
+// format ngày tháng năm
+const formatDate = (date) => {
+  if (!date) return "";
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
+};
+
+const formatDateTime = (date) => {
+  if (!date) return "";
+
+  return new Intl.DateTimeFormat("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(new Date(date));
+};
 
 // giới hạn đoạn văn
 const limitString = (str, maxLength) => {
@@ -107,5 +131,7 @@ const ulti = {
   limitString,
   splitIntoColumns,
   slugify,
+  formatDate,
+  formatDateTime,
 };
 export default ulti;

@@ -48,6 +48,7 @@ const initialState = {
   isStaff: savedRole === "STAFF",
   loading: false,
   error: null,
+  user: null,
 };
 
 const authSlice = createSlice({
@@ -62,6 +63,7 @@ const authSlice = createSlice({
       state.error = null;
 
       localStorage.removeItem("token");
+      localStorage.removeItem("roleId");
     },
   },
   extraReducers: (builder) => {
@@ -83,6 +85,11 @@ const authSlice = createSlice({
 
         state.isAdmin = state.role === "ADMIN";
         state.isStaff = state.role === "STAFF";
+
+        state.user = {
+          username: action.payload.username,
+          email: action.payload.email,
+        };
 
         localStorage.setItem("token", token);
         localStorage.setItem("roleId", action.payload.roleId);
