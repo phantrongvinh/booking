@@ -17,20 +17,10 @@ const fetchProductByCategory = async (categoryId) => {
   return data;
 };
 
-const fetchProductBySearch = async (name) => {
-  const { data } = await axiosClient.get(`${url}/search`, {
-    params: {
-      name,
-    },
-  });
-  return data;
-};
-
 const productAPI = {
   fetchProduct,
   fetchProductById,
   fetchProductByCategory,
-  fetchProductBySearch,
 };
 
 export default productAPI;

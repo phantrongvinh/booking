@@ -73,7 +73,6 @@ export default function Header() {
     searchProduct(value);
   };
 
-  // fetch me
   const {
     data: { user },
     loading,
