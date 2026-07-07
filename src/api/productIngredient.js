@@ -7,5 +7,13 @@ const linkProductIngredient = async (form) => {
   return res.data;
 };
 
-const productIngredientAPI = { linkProductIngredient };
+const getProductIngredientByProductName = async (name) => {
+  const res = await axiosClient.get(`${url}/by-product/${name}`);
+  return res.data;
+};
+
+const productIngredientAPI = {
+  linkProductIngredient,
+  getProductIngredientByProductName,
+};
 export default productIngredientAPI;

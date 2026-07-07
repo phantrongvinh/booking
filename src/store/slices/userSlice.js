@@ -27,6 +27,18 @@ export const updateProfile = createAsyncThunk(
   },
 );
 
+export const fetchUsers = createAsyncThunk(
+  "user/fetchUser",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await userAPI.fetchUsers();
+      return res;
+    } catch (error) {
+      return rejectWithValue("Không tìm thấy khách hàng");
+    }
+  },
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
@@ -34,6 +46,7 @@ const userSlice = createSlice({
     loading: false,
     error: null,
     message: null,
+    customers: [],
   },
   reducers: {
     clearMessage: (state) => {
@@ -63,6 +76,18 @@ const userSlice = createSlice({
         state.message = "Cập nhất thành công";
       })
       .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Chưa đăng nhập";
+      })
+      .addCase(fetchUsers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUsers.fulfilled, (state, action) => {
+        state.loading = false;
+        state.customers = action.payload;
+      })
+      .addCase(fetchUsers.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Chưa đăng nhập";
       });

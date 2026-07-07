@@ -27,6 +27,7 @@ import StaffIngredient from "@/pages/StaffIngredient";
 import AdUser from "@/pages/AdUser";
 import AdStaff from "@/pages/AdStaff";
 import AdOrder from "@/pages/AdOrder";
+import AdminLayout from "@/pages/layout/AdminLayout";
 
 function App() {
   return (
@@ -101,13 +102,13 @@ function App() {
           path="/admin"
           element={
             <PrivateRoute roles={["ADMIN"]}>
-              <StaffLayout />
+              <AdminLayout />
             </PrivateRoute>
           }
         >
-          <Route path="aduser" element={<AdUser />} />
-          <Route path="adstaff" element={<AdStaff />} />
-          <Route path="adorder" element={<AdOrder />} />
+          <Route path="users" element={<AdUser />} />
+          <Route path="staffs" element={<AdStaff />} />
+          <Route path="orders" element={<AdOrder />} />
         </Route>
 
         {/* Route không tồn tại */}

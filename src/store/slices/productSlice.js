@@ -50,12 +50,26 @@ export const linkProductIngredient = createAsyncThunk(
   },
 );
 
+export const getProductIngredientByProductName = createAsyncThunk(
+  "product/productIngredient",
+  async (name, { rejectWithValue }) => {
+    try {
+      const res =
+        await productIngredientAPI.getProductIngredientByProductName(name);
+      return res;
+    } catch (error) {
+      return rejectWithValue("Lấy thông tin sản phẩm thất bại");
+    }
+  },
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState: {
     products: [],
     loading: false,
     error: null,
+    productIngredients: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -91,6 +105,18 @@ const productSlice = createSlice({
         state.loading = false;
       })
       .addCase(linkProductIngredient.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+      .addCase(getProductIngredientByProductName.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getProductIngredientByProductName.fulfilled, (state, action) => {
+        state.loading = false;
+        state.productIngredients = action.payload;
+      })
+      .addCase(getProductIngredientByProductName.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
