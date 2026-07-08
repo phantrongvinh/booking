@@ -17,6 +17,15 @@ const fetchProductByCategory = async (categoryId) => {
   return data;
 };
 
+const fetchProductBySearch = async (name) => {
+  const { data } = await axiosClient.get(`${url}/search`, {
+    params: {
+      name,
+    },
+  });
+  return data;
+};
+
 const createProduct = async (data) => {
   const formData = new FormData();
 
@@ -138,7 +147,6 @@ const productAPI = {
   updateStorageInstructions,
   updateSizeName,
   fetchProductBySearch,
- 
 };
 
 export default productAPI;
