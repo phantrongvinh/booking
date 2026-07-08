@@ -9,6 +9,7 @@ const fetchAllOrder = async () => {
 
 const createOrder = async (data) => {
   const res = await axiosClient.post(url, data);
+  return res.data;
 };
 
 const fetchOrderById = async (id) => {
@@ -50,4 +51,5 @@ const orderAPI = {
   cancelOrder,
   confirmOrder,
 };
+
 export default orderAPI;
