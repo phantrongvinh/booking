@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { X, Plus, Trash2, User, Package } from "lucide-react";
+import { X, Plus, Trash2, User, Package, Printer } from "lucide-react";
 import { useFetch, useSubmit } from "@/hook/customHook";
 import { getOrderById, updateOrderStatus } from "@/store/slices/orderSlice";
 import { fetchAllProduct } from "@/store/slices/productSlice";
@@ -19,6 +19,7 @@ const inputCls =
 const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
   const dispatch = useDispatch();
 
+  // handle fetch order theo id
   const {
     data: { order } = {},
     loading: orderLoading,
@@ -41,15 +42,24 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
   const [selectedStatus, setSelectedStatus] = useState("");
   const [note, setNote] = useState("");
 
+  // submit trạng thái order
   const { submit: updateStatus, loading: updating } = useSubmit(
     async ({ orderId, newStatus, note }) => {
-      await dispatch(updateOrderStatus({ orderId, newStatus, note })).unwrap();
+      const res = await dispatch(
+        updateOrderStatus({ orderId, newStatus, note }),
+      ).unwrap();
+      console.log(res);
     },
     {
       onSuccess: () => {
         setNote("");
         setSelectedStatus("");
         onUpdated?.("Đã cập nhật trạng thái đơn hàng.");
+      },
+      onError: (err) => {
+        const message =
+          typeof err === "string" ? err : "Cập nhật trạng thái thất bại.";
+        onUpdated?.(message, "error");
       },
     },
   );
@@ -63,7 +73,7 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
     });
   };
 
-  // ---------- CREATE MODE: tạo đơn mới ----------
+  // handle tạo đơn mới
   const {
     data: { customers, products },
   } = useFetch(
@@ -191,12 +201,23 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
               ? `Chi tiết đơn hàng #${orderId ?? ""}`
               : "Tạo đơn hàng mới"}
           </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X className="h-5 w-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            {mode === "view" && order && (
+              <button
+                onClick={() => window.print()}
+                title="In hóa đơn"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#FFE7BA] text-gray-500 hover:border-[#FA8C00] hover:text-[#FA8C00]"
+              >
+                <Printer className="h-4 w-4" />
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-6">
@@ -207,68 +228,74 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
               </p>
             ) : (
               <>
-                <div className="grid grid-cols-2 gap-4 rounded-xl bg-[#FFF7E6] p-4 text-sm">
-                  <Field label="Khách hàng" value={order.customerName} />
-                  <Field label="Số điện thoại" value={order.phone} />
-                  <Field
-                    label="Ngày đặt"
-                    value={ulti.formatDateTime(new Date(order.createdAt))}
-                  />
-                  <Field label="Thanh toán" value={order.paymentMethod} />
-                  <Field
-                    label="Địa chỉ giao"
-                    value={order.shippingAddress}
-                    full
-                  />
-                  {order.note && (
-                    <Field label="Ghi chú" value={order.note} full />
-                  )}
-                  {order.cancelReason && (
-                    <Field label="Lý do hủy" value={order.cancelReason} full />
-                  )}
-                </div>
-
-                <div>
-                  <p className="mb-2 text-sm font-semibold text-[#5B3A0A]">
-                    Sản phẩm
-                  </p>
-                  <div className="overflow-hidden rounded-xl border border-[#FFE7BA]">
-                    <table className="w-full text-sm">
-                      <thead className="bg-[#FFF7E6] text-xs text-gray-500">
-                        <tr>
-                          <th className="px-3 py-2 text-left">Tên</th>
-                          <th className="px-3 py-2 text-center">Size</th>
-                          <th className="px-3 py-2 text-center">SL</th>
-                          <th className="px-3 py-2 text-right">Đơn giá</th>
-                          <th className="px-3 py-2 text-right">Thành tiền</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {order.items.map((it, i) => (
-                          <tr key={i} className="border-t border-[#FFE7BA]">
-                            <td className="px-3 py-2">{it.productName}</td>
-                            <td className="px-3 py-2 text-center text-gray-500">
-                              {it.sizeName || "—"}
-                            </td>
-                            <td className="px-3 py-2 text-center">
-                              {it.quantity}
-                            </td>
-                            <td className="px-3 py-2 text-right">
-                              {currency(it.unitPrice)}
-                            </td>
-                            <td className="px-3 py-2 text-right font-semibold">
-                              {currency(it.totalPrice)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <div id="invoice-print-area">
+                  <div className="grid grid-cols-2 gap-4 rounded-xl bg-[#FFF7E6] p-4 text-sm">
+                    <Field label="Khách hàng" value={order.customerName} />
+                    <Field label="Số điện thoại" value={order.phone} />
+                    <Field
+                      label="Ngày đặt"
+                      value={ulti.formatDateTime(new Date(order.createdAt))}
+                    />
+                    <Field label="Thanh toán" value={order.paymentMethod} />
+                    <Field
+                      label="Địa chỉ giao"
+                      value={order.shippingAddress}
+                      full
+                    />
+                    {order.note && (
+                      <Field label="Ghi chú" value={order.note} full />
+                    )}
+                    {order.cancelReason && (
+                      <Field
+                        label="Lý do hủy"
+                        value={order.cancelReason}
+                        full
+                      />
+                    )}
                   </div>
-                  <div className="mt-3 flex justify-end text-base font-bold text-[#5B3A0A]">
-                    Tổng cộng:{" "}
-                    <span className="ml-2 text-[#FA8C00]">
-                      {currency(order.totalPrice)}
-                    </span>
+
+                  <div>
+                    <p className="mb-2 text-sm font-semibold text-[#5B3A0A]">
+                      Sản phẩm
+                    </p>
+                    <div className="overflow-hidden rounded-xl border border-[#FFE7BA]">
+                      <table className="w-full text-sm">
+                        <thead className="bg-[#FFF7E6] text-xs text-gray-500">
+                          <tr>
+                            <th className="px-3 py-2 text-left">Tên</th>
+                            <th className="px-3 py-2 text-center">Size</th>
+                            <th className="px-3 py-2 text-center">SL</th>
+                            <th className="px-3 py-2 text-right">Đơn giá</th>
+                            <th className="px-3 py-2 text-right">Thành tiền</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {order.items.map((it, i) => (
+                            <tr key={i} className="border-t border-[#FFE7BA]">
+                              <td className="px-3 py-2">{it.productName}</td>
+                              <td className="px-3 py-2 text-center text-gray-500">
+                                {it.sizeName || "—"}
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                {it.quantity}
+                              </td>
+                              <td className="px-3 py-2 text-right">
+                                {currency(it.unitPrice)}
+                              </td>
+                              <td className="px-3 py-2 text-right font-semibold">
+                                {currency(it.totalPrice)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                    <div className="mt-3 flex justify-end text-base font-bold text-[#5B3A0A]">
+                      Tổng cộng:{" "}
+                      <span className="ml-2 text-[#FA8C00]">
+                        {currency(order.totalPrice)}
+                      </span>
+                    </div>
                   </div>
                 </div>
 

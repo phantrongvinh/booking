@@ -72,8 +72,7 @@ function App() {
               </PrivateRoute>
             }
           >
-            <Route index element={<Navigate to="profile" replace />} />
-            <Route path="profile" element={<Profile />} />
+            <Route index element={<Profile />} />
             <Route path="notification" element={<Notification />} />
             <Route path="orders" element={<Order />} />
             <Route path="address" element={<Addresses />} />
