@@ -17,11 +17,11 @@ import { Link, NavLink } from "react-router-dom";
 
 const navItems = [
   { to: "/admin", label: "Tổng Quan", icon: LayoutDashboard, end: true },
-  { to: "/admin/orders", label: "Đơn hàng", icon: ShoppingBag, end: true },
-  { to: "/admin/products", label: "Sản phẩm", icon: Cake, end: true },
+  { to: "/admin/adorder", label: "Đơn hàng", icon: ShoppingBag, end: true },
+  { to: "/admin/adproduct", label: "Sản phẩm", icon: Cake, end: true },
   { to: "/admin/ingredients", label: "Nguyên liệu", icon: Wheat, end: true },
-  { to: "/admin/users", label: "Khách hàng", icon: User, end: true },
-  { to: "/admin/staffs", label: "Nhân viên", icon: UserPen, end: true },
+  { to: "/admin/aduser", label: "Khách hàng", icon: User, end: true },
+  { to: "/admin/adstaff", label: "Nhân viên", icon: UserPen, end: true },
   { to: "/admin/vouchers", label: "Voucher", icon: Ticket, end: true },
   { to: "/admin/blogs", label: "Bài viết", icon: ScrollText, end: true },
   { to: "/admin/web", label: "Quản lý web", icon: Globe, end: true },
