@@ -115,9 +115,19 @@ const StaffProduct = () => {
   const LOW_STOCK = 10;
 
   const getStockWarning = (productName) => {
+    const hasLoaded = Object.prototype.hasOwnProperty.call(
+      recipeMap,
+      productName,
+    );
     const recipe = recipeMap[productName];
 
-    if (!recipe) return null;
+    if (!hasLoaded) {
+      return { type: "loading" };
+    }
+
+    if (!recipe || recipe.ingredients.length <= 0) {
+      return { type: "error" };
+    }
 
     const outOfStock = recipe.ingredients.filter((i) => i.currentStock <= 0);
     const lowStock = recipe.ingredients.filter(
@@ -130,13 +140,25 @@ const StaffProduct = () => {
     if (lowStock.length > 0) {
       return { type: "low", count: lowStock.length, items: lowStock };
     }
-    return null;
+    return { type: "ok" };
   };
 
   const renderStockWarning = (productName) => {
     const warning = getStockWarning(productName);
 
-    if (!warning) {
+    if (warning.type === "loading") {
+      return (
+        <span className="text-xs text-gray-400 animate-pulse">Đang tải...</span>
+      );
+    }
+
+    if (warning.type === "error") {
+      return (
+        <span className="text-xs text-gray-400">Chưa cập nhật nguyên liệu</span>
+      );
+    }
+
+    if (warning.type === "ok") {
       return <span className="text-xs text-emerald-600">Đủ nguyên liệu</span>;
     }
 

@@ -129,10 +129,11 @@ const StaffOrder = () => {
     setIsModalOpen(true);
   };
 
-  const handleUpdated = (message) => {
-    reloadList();
-    setIsModalOpen(false);
-    setToast({ message, type: "success" });
+  const handleUpdated = (message, type = "success") => {
+    if (type === "success") {
+      reloadList();
+    }
+    setToast({ message, type });
   };
 
   return (

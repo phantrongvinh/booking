@@ -31,3 +31,12 @@ export const statusDot = {
 export const paymentMethods = ["COD", "Momo", "Chuyển khoản"];
 
 export const currency = (n) => (n ?? 0).toLocaleString("vi-VN") + "đ";
+
+export const cancelReasons = [
+  "Đổi ý, không muốn mua nữa",
+  "Đặt nhầm sản phẩm / số lượng",
+  "Tìm được giá tốt hơn ở nơi khác",
+  "Thời gian giao hàng quá lâu",
+  "Muốn thay đổi địa chỉ giao hàng",
+  "Lý do khác",
+];

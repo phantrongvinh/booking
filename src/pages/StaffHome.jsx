@@ -17,6 +17,8 @@ import { useDispatch } from "react-redux";
 import { fetchOrder } from "@/store/slices/orderSlice";
 import { fetchAllIngredient } from "@/store/slices/ingredientSlice";
 import { isToday } from "date-fns";
+import ulti from "@/ultis/ulti";
+import { statusDot, statusStyles } from "@/lib/orderConstants";
 
 const StaffHome = () => {
   const dispatch = useDispatch();
@@ -159,12 +161,12 @@ const StaffHome = () => {
                     #{o.orderId} · {o.customerName}
                   </p>
                   <p className="text-xs text-gray-400">
-                    {new Date(o.createdAt).toLocaleString("vi-VN")}
+                    {ulti.formatDateTime(new Date(o.createdAt))}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="text-sm font-bold text-[#FA8C00]">
-                    {currency(o.totalPrice)}
+                    {ulti.formatVND(o.totalPrice)}
                   </p>
                   <span
                     className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[o.status]}`}

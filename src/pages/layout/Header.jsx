@@ -2,6 +2,7 @@ import { useFetch } from "@/hook/customHook";
 import { logout } from "@/store/slices/authSlice";
 import { fetchMe } from "@/store/slices/userSlice";
 import {
+  Bell,
   LayoutDashboard,
   LogOut,
   Search,
@@ -86,6 +87,10 @@ export default function Header() {
       initialData: { user: null },
     },
   );
+
+  // notification
+  const notifications = [];
+  const unread = notifications.filter((n) => !n.isRead).length;
   return (
     <>
       <div className="py-1 bg-[#FFC13B]">
@@ -97,7 +102,7 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <header className="w-full sticky top-0 z-[999]">
+      <header className="w-full sticky top-0 z-[100]">
         <div className="bg-[#FFF8E8]">
           <div className="container mx-auto py-2 grid grid-cols-3">
             {/* Logo - Đã cập nhật link ảnh */}
@@ -176,7 +181,21 @@ export default function Header() {
                     <ShoppingBag size={20} />
                   </button>
                 </Link>
-
+                <Link
+                  to="/account/notifications"
+                  className="relative flex h-10 w-10 items-center justify-center rounded-full border border-[#2B1B12] text-[#2B1B12] transition-colors hover:bg-[#FFC13B]/30"
+                  aria-label="Thông báo"
+                >
+                  <Bell
+                    size={20}
+                    className={unread > 0 ? "animate-bell-swing" : ""}
+                  />
+                  {unread > 0 && (
+                    <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white ring-2 ring-white">
+                      {unread}
+                    </span>
+                  )}
+                </Link>
                 {!isLoggedIn ? (
                   <Link
                     to="/auth"
@@ -207,7 +226,7 @@ export default function Header() {
 
                         {/* Hồ sơ cá nhân */}
                         <Link
-                          to="/account/profile"
+                          to="/account"
                           onClick={() => setOpen(false)}
                           className="flex items-center gap-3 px-4 py-2 text-sm text-[#2B1B12] hover:bg-[#FFC13B]/20 transition-colors"
                         >
