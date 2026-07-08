@@ -9,10 +9,14 @@ const fetchAllOrder = async () => {
 
 const createOrder = async (data) => {
   const res = await axiosClient.post(url, data);
+  return res.data;
+};
+
 const fetchOrderById = async (id) => {
   const res = await axiosClient.get(`${url}/${id}`);
   return res.data;
 };
+
 const updateOrderStatus = async (id, newStatus, note) => {
   const res = await axiosClient.put(`${url}/${id}/status`, {
     newStatus,
@@ -27,4 +31,5 @@ const orderAPI = {
   fetchOrderById,
   updateOrderStatus,
 };
+
 export default orderAPI;

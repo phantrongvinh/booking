@@ -27,6 +27,7 @@ import StaffIngredient from "@/pages/StaffIngredient";
 import AdUser from "@/pages/AdUser";
 import AdStaff from "@/pages/AdStaff";
 import AdOrder from "@/pages/AdOrder";
+import AdProduct from "@/pages/AdProduct";
 
 function App() {
   return (
@@ -105,6 +106,7 @@ function App() {
           <Route path="aduser" element={<AdUser />} />
           <Route path="adstaff" element={<AdStaff />} />
           <Route path="adorder" element={<AdOrder />} />
+          <Route path="adproduct" element={<AdProduct />} />
         </Route>
 
         {/* Route không tồn tại */}
