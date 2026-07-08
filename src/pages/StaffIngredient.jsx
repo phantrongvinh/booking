@@ -1,209 +1,261 @@
-import StatusBadge from "@/components/staff/StatusBadge";
-import { Button } from "@/components/ui/button";
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Search,
+  RotateCcw,
+  ClipboardCheck,
+  AlertTriangle,
+  Wheat,
+  PackageX,
+} from "lucide-react";
 import { useFetch } from "@/hook/customHook";
 import { fetchAllIngredient } from "@/store/slices/ingredientSlice";
-import ulti from "@/ultis/ulti";
-import { ClipboardList, Search } from "lucide-react";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import StatCard from "@/components/staff/StatCard";
+import IngredientModal from "@/components/staff/IngredientModal";
+import Pagination from "@/components/Pagination";
+import ToastNotification from "@/components/admin/ToastNotification";
 
+const LOW_STOCK = 10;
+
+const inputCls =
+  "h-9 rounded-lg border border-[#FFE7BA] bg-white px-3 text-xs outline-none focus:border-[#FA8C00]";
+
+// handle tính toán số lượng nguyên liệu
+const getIngredientLevel = (currentStock) => {
+  if (currentStock <= 0) return "out";
+  if (currentStock <= LOW_STOCK) return "low";
+  return "ok";
+};
+
+// fetch ingredients
 const StaffIngredient = () => {
   const dispatch = useDispatch();
 
   const {
     data: { ingredients },
-    loading,
+    fetch: reloadList,
   } = useFetch(
     async () => {
       const ingredients = await dispatch(fetchAllIngredient()).unwrap();
-
-      return {
-        ingredients,
-      };
+      return { ingredients };
     },
     { initialData: { ingredients: [] } },
   );
 
-  // handle filter
-  // stock
-  const [stockFilter, setStockFilter] = useState("all");
-  // search
-  const [query, setQuery] = useState("");
+  // handle filter và search
+  const [search, setSearch] = useState("");
+  const [levelFilter, setLevelFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const pageSize = 8;
 
-  const filteredIngredient = ingredients?.filter((item) => {
-    const matchSearch = item.name.toLowerCase().includes(query.toLowerCase());
+  const [selected, setSelected] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [toast, setToast] = useState(null);
 
-    const matchStock =
-      stockFilter === "all" ||
-      (stockFilter === "low" && item.currentStock < 10) ||
-      (stockFilter === "available" && item.currentStock >= 10);
-
-    return matchSearch && matchStock;
-  });
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase();
+    return ingredients.filter((i) => {
+      const ms = !q || i.name.toLowerCase().includes(q);
+      const ml =
+        levelFilter === "all" ||
+        getIngredientLevel(i.currentStock) === levelFilter;
+      return ms && ml;
+    });
+  }, [ingredients, search, levelFilter]);
 
   // pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 5;
+  useEffect(() => setPage(1), [search, levelFilter]);
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
+  const pageItems = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-  const totalPages = Math.ceil((filteredIngredient?.length || 0) / pageSize);
+  const lowCount = ingredients.filter(
+    (i) => getIngredientLevel(i.currentStock) === "low",
+  ).length;
+  const outCount = ingredients.filter(
+    (i) => getIngredientLevel(i.currentStock) === "out",
+  ).length;
 
-  const currentIngredient = useMemo(() => {
-    return filteredIngredient.slice(
-      (currentPage - 1) * pageSize,
-      currentPage * pageSize,
-    );
-  }, [filteredIngredient, currentPage]);
+  const openCount = (i) => {
+    setSelected(i);
+    setModalOpen(true);
+  };
+
+  const handleSaved = () => {
+    reloadList();
+    setModalOpen(false);
+    setToast({ message: "Đã cập nhật kiểm kê nguyên liệu.", type: "success" });
+  };
+
+  const resetAll = () => {
+    setSearch("");
+    setLevelFilter("all");
+    reloadList();
+    setToast({ message: "Đã đặt lại bộ lọc & tìm kiếm", type: "success" });
+  };
 
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Nguyên liệu</h1>
-        <p className="text-gray-500">Theo dõi tồn kho và báo cáo hao hụt</p>
+        <h1 className="text-2xl font-bold text-[#5B3A0A]">Kho Nguyên liệu</h1>
+        <p className="text-sm text-gray-500">
+          Theo dõi tồn kho, cảnh báo sắp hết và kiểm kê hao hụt.
+        </p>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card shadow-sm">
-        {/* SEARCH */}
-        <div className="flex flex-col justify-between gap-3 border-b border-border p-4 sm:flex-row sm:items-center">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Tìm sản phẩm…"
-              className="h-10 w-full rounded-lg border border-input bg-background pl-9 pr-3 text-sm outline-none focus:border-ring focus:ring-1 focus:ring-ring"
-            />
+      <div className="mb-6 grid gap-4 sm:grid-cols-3">
+        <StatCard
+          label="Tổng nguyên liệu"
+          value={ingredients.length}
+          icon={Wheat}
+          tone="brand"
+        />
+        <StatCard
+          label="Sắp hết"
+          value={lowCount}
+          icon={AlertTriangle}
+          tone="amber"
+        />
+        <StatCard
+          label="Hết hàng"
+          value={outCount}
+          icon={PackageX}
+          tone="rose"
+        />
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-[#FFE7BA] bg-white shadow-sm">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#FFE7BA] p-4">
+          <h2 className="font-bold text-[#5B3A0A]">Danh sách nguyên liệu</h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative">
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Tìm nguyên liệu..."
+                className="h-9 w-48 rounded-lg border border-[#FFE7BA] bg-white pl-8 pr-3 text-xs outline-none focus:border-[#FA8C00]"
+              />
+            </div>
+            <select
+              value={levelFilter}
+              onChange={(e) => setLevelFilter(e.target.value)}
+              className={inputCls}
+            >
+              <option value="all">Mọi trạng thái</option>
+              <option value="ok">Đủ hàng</option>
+              <option value="low">Sắp hết</option>
+              <option value="out">Hết hàng</option>
+            </select>
+            <button
+              onClick={resetAll}
+              title="Đặt lại"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#FFE7BA] text-gray-500 hover:bg-[#FFF7E6]"
+            >
+              <RotateCcw className="h-4 w-4" />
+            </button>
           </div>
-          <Select value={stockFilter} onValueChange={setStockFilter}>
-            <SelectTrigger className="w-full h-10 sm:w-48">
-              <SelectValue placeholder="Số lượng" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả</SelectItem>
-              <SelectItem value="low">Sắp hết</SelectItem>
-              <SelectItem value="available">Còn hàng</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-sm">
-            <thead>
-              <tr className="bg-muted/40 text-left text-xs uppercase text-muted-foreground">
-                <th className="px-5 py-3">Mã nguyên liệu</th>
-                <th className="px-5 py-3">Tên nguyên liệu</th>
-                <th className="px-5 py-3">Đơn vị</th>
-                <th className="px-5 py-3">Số lượng</th>
-                <th className="px-5 py-3">Giá đơn vị</th>
-                <th className="px-5 py-3">Trạng thái</th>
-                <th className="px-5 py-3 text-right">Kiểm kê</th>
+          <table className="w-full text-sm">
+            <thead className="bg-[#FFF7E6] text-xs text-gray-500">
+              <tr>
+                <th className="px-4 py-3 text-left">Nguyên liệu</th>
+                <th className="px-4 py-3 text-left">Đơn vị</th>
+                <th className="px-4 py-3 text-right">Tồn kho</th>
+                <th className="px-4 py-3 text-right">Đơn giá</th>
+                <th className="px-4 py-3 text-left">Trạng thái</th>
+                <th className="px-4 py-3 text-center">Hành động</th>
               </tr>
             </thead>
-
             <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={7} className="p-5 text-center">
-                    Loading...
-                  </td>
-                </tr>
-              ) : currentIngredient?.length === 0 ? (
+              {pageItems.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
-                    className="py-8 text-center text-muted-foreground"
+                    colSpan={6}
+                    className="px-4 py-10 text-center text-sm text-gray-400"
                   >
-                    Không tìm thấy nguyên liệu.
+                    Không tìm thấy nguyên liệu nào.
                   </td>
                 </tr>
               ) : (
-                currentIngredient?.map((i) => (
-                  <tr
-                    key={i.id}
-                    className="border-t hover:bg-muted/30 cursor-pointer"
-                  >
-                    <td className="px-5 py-3 font-semibold">
-                      {i.ingredientId}
-                    </td>
-
-                    <td className="px-5 py-3">
-                      <div className="flex items-center gap-3">
-                        <span>{i.name}</span>
-                      </div>
-                    </td>
-
-                    <td className="px-5 py-3 text-muted-foreground">
-                      {i.unit}
-                    </td>
-
-                    {i.currentStock <= 10 ? (
-                      <td className="px-5 py-3 font-medium text-destructive">
-                        {i.currentStock}
+                pageItems.map((i) => {
+                  const level = getIngredientLevel(i.currentStock);
+                  const badge = {
+                    ok: {
+                      t: "Đủ hàng",
+                      c: "border-emerald-200 bg-emerald-50 text-emerald-700",
+                    },
+                    low: {
+                      t: "Sắp hết",
+                      c: "border-amber-200 bg-amber-50 text-amber-700",
+                    },
+                    out: {
+                      t: "Hết hàng",
+                      c: "border-rose-200 bg-rose-50 text-rose-700",
+                    },
+                  }[level];
+                  return (
+                    <tr
+                      key={i.ingredientId}
+                      className="border-t border-[#FFE7BA] transition-colors hover:bg-[#FFF8E8]/60"
+                    >
+                      <td className="px-4 py-3 font-medium text-[#5B3A0A]">
+                        {i.name}
                       </td>
-                    ) : (
-                      <td className="px-5 py-3 font-medium">
-                        {i.currentStock}
+                      <td className="px-4 py-3 text-gray-500">{i.unit}</td>
+                      <td className="px-4 py-3 text-right font-semibold text-[#5B3A0A]">
+                        {i.currentStock} {i.unit}
                       </td>
-                    )}
-
-                    <td className="px-5 py-3 font-medium">
-                      {ulti.formatVND(i.costPerUnit)}
-                    </td>
-
-                    <td className="px-5 py-3 ">
-                      <StatusBadge status={i.status} />
-                    </td>
-
-                    <td className="px-5 py-3 ">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
-                          <ClipboardList className="h-4 w-4 text-blue-600" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      <td className="px-4 py-3 text-right text-gray-500">
+                        {i.costPerUnit.toLocaleString("vi-VN")}đ
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${badge.c}`}
+                        >
+                          {badge.t}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-center">
+                        <button
+                          onClick={() => openCount(i)}
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-[#FFE7BA] px-3 py-1.5 text-xs font-semibold text-[#5B3A0A] transition-all hover:border-[#FA8C00] hover:text-[#FA8C00]"
+                        >
+                          <ClipboardCheck className="h-3.5 w-3.5" /> Kiểm kê
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
-          <div className="flex items-center justify-between border-t p-4">
-            <span className="text-sm text-muted-foreground">
-              Hiển thị {(currentPage - 1) * pageSize + 1}-
-              {Math.min(currentPage * pageSize, filteredIngredient?.length)}
-              {" / "}
-              {filteredIngredient?.length} sản phẩm
-            </span>
-
-            <div className="flex items-center gap-2">
-              <button
-                className="rounded border px-3 py-1 disabled:opacity-50"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-              >
-                Trước
-              </button>
-
-              <span className="text-sm">
-                {currentPage} / {totalPages || 1}
-              </span>
-
-              <button
-                className="rounded border px-3 py-1 disabled:opacity-50"
-                disabled={currentPage === totalPages || totalPages === 0}
-                onClick={() => setCurrentPage((p) => p + 1)}
-              >
-                Sau
-              </button>
-            </div>
-          </div>
         </div>
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onChange={setPage}
+          totalItems={filtered.length}
+          pageSize={pageSize}
+        />
       </div>
+
+      <IngredientModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        ingredient={selected}
+        onSaved={handleSaved}
+      />
+
+      {toast && (
+        <ToastNotification
+          key={toast.message + Date.now()}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </>
   );
 };

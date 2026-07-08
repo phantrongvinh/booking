@@ -1,6 +1,10 @@
 import {
+  AlertTriangle,
+  ArrowRight,
   Banknote,
   Cake,
+  CircleDollarSign,
+  Clock,
   Printer,
   ShoppingBag,
   Wallet,
@@ -11,200 +15,221 @@ import { Link } from "react-router-dom";
 import { useFetch } from "@/hook/customHook";
 import { useDispatch } from "react-redux";
 import { fetchOrder } from "@/store/slices/orderSlice";
-import { useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { fetchAllIngredient } from "@/store/slices/ingredientSlice";
+import { isToday } from "date-fns";
 import ulti from "@/ultis/ulti";
+import { statusDot, statusStyles } from "@/lib/orderConstants";
 
 const StaffHome = () => {
   const dispatch = useDispatch();
 
+  // call api lây danh sách sau đó đưa vào custom hook useFetch để tránh re call
+  const fetchDashboard = useCallback(async () => {
+    const [orderRes, ingredientRes] = await Promise.allSettled([
+      dispatch(fetchOrder()).unwrap(),
+      dispatch(fetchAllIngredient()).unwrap(),
+    ]);
+
+    return {
+      orders: orderRes.status === "fulfilled" ? orderRes.value.data : [],
+      ingredients:
+        ingredientRes.status === "fulfilled" ? ingredientRes.value : [],
+    };
+  }, [dispatch]);
+
   const {
-    data: { orders },
+    data: { orders, ingredients },
     loading,
-  } = useFetch(
-    async () => {
-      const rs = await dispatch(fetchOrder()).unwrap();
-      const orders = rs.data;
-      return { orders };
+  } = useFetch(fetchDashboard, {
+    initialData: {
+      orders: [],
+      ingredients: [],
     },
-    {
-      initialData: { orders: [] },
-    },
-  );
+  });
 
-  // recent orders
-  const recent = [...orders]
-    ?.filter((o) => o.status === "Chờ xác nhận")
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 5);
+  // số lượng đơn chờ, hoàn thành, tổng đơn hôm nay
+  const stats = useMemo(() => {
+    const todayOrders = orders?.filter((order) =>
+      isToday(new Date(order.createdAt)),
+    );
 
-  // user
-  const userName = "";
+    const pendingOrders = orders?.filter(
+      (order) => order.status === "Chờ xác nhận",
+    );
+
+    const revenueToday = todayOrders?.filter(
+      (order) => order.status === "Hoàn thành",
+    );
+
+    return {
+      todayOrders,
+      pendingOrders,
+      revenueToday,
+    };
+  }, [orders]);
+
+  // số lượng nguyên liệu sắp hết
+  const MIN_STOCK = 10;
+
+  const lowIngredients = useMemo(() => {
+    return ingredients.filter(
+      (ingredient) => ingredient.currentStock <= MIN_STOCK,
+    );
+  }, [ingredients]);
+
+  // danh sách đơn mới nhất đơn chờ xử lý
+  const recentPendingOrders = useMemo(() => {
+    return [...orders]
+      .filter((order) => order.status === "Chờ xác nhận")
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 5);
+  }, [orders]);
+
+  // danh sách nguyên liệu sắp hết và cạn nhất
+
+  const lowIngredientsList = useMemo(() => {
+    return ingredients
+      .filter((item) => item.currentStock <= MIN_STOCK)
+      .sort((a, b) => a.currentStock - b.currentStock)
+      .slice(0, 5);
+  }, [ingredients]);
   return (
     <>
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Tổng quan</h1>
-        <p className="text-gray-500">
-          Chào mừng trở lại, đây là tình hình hôm nay 🥐
+        <h1 className="text-2xl font-bold text-[#5B3A0A]">Tổng quan</h1>
+        <p className="text-sm text-gray-500">
+          Chào mừng trở lại! Đây là tình hình hôm nay của tiệm bánh.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          icon={<Banknote className="h-5 w-5 text-green-500" />}
-          accent="bg-green-500/12"
-          label="Tổng đơn hàng"
-          value={1000}
+          label="Đơn hàng hôm nay"
+          value={stats.todayOrders.length}
+          hint="Đơn tạo trong ngày"
+          icon={ShoppingBag}
+          tone="brand"
         />
-
         <StatCard
-          icon={<ShoppingBag className="h-5 w-5 text-yellow-500" />}
-          accent="bg-yellow-500/12"
-          label="Đơn hàng chờ xử lý"
-          value={28}
+          label="Đơn chờ xử lý"
+          value={stats.pendingOrders.length}
+          hint="Chờ xác nhận"
+          icon={Clock}
+          tone="amber"
         />
-
         <StatCard
-          icon={<ShoppingBag className="h-5 w-5 text-destructive" />}
-          accent="bg-destructive/12"
-          label="Cảnh báo hết hàng"
-          value={9}
+          label="Đơn hoàn thành"
+          value={stats.revenueToday.length}
+          hint="Hoàn thành"
+          icon={CircleDollarSign}
+          tone="emerald"
+        />
+        <StatCard
+          label="Cảnh báo nguyên liệu"
+          value={lowIngredients.length}
+          hint="Sắp hết / hết hàng"
+          icon={AlertTriangle}
+          tone="rose"
         />
       </div>
-      <div className="mt-6 overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border px-6 py-4">
-          <div>
-            <h2 className="text-lg font-semibold text-foreground">
-              Đơn hàng gần đây
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Danh sách 5 đơn hàng mới nhất
-            </p>
-          </div>
 
-          <Link
-            to="/staff/orders"
-            className="rounded-lg border border-orange-200 px-4 py-2 text-sm font-medium text-orange-500 transition hover:bg-orange-50"
-          >
-            Xem tất cả
-          </Link>
+      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+        {/* Pending orders */}
+        <div className="rounded-2xl border border-[#FFE7BA] bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-bold text-[#5B3A0A]">Đơn hàng chờ xử lý</h2>
+            <Link
+              to="/staff/orders"
+              className="flex items-center gap-1 text-xs font-semibold text-[#FA8C00] hover:underline"
+            >
+              Xem tất cả <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {recentPendingOrders.length === 0 && (
+              <p className="py-6 text-center text-sm text-gray-400">
+                Không có đơn nào đang chờ.
+              </p>
+            )}
+            {recentPendingOrders.slice(0, 5).map((o) => (
+              <div
+                key={o.orderId}
+                className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5"
+              >
+                <div>
+                  <p className="text-sm font-semibold text-[#5B3A0A]">
+                    #{o.orderId} · {o.customerName}
+                  </p>
+                  <p className="text-xs text-gray-400">
+                    {ulti.formatDateTime(new Date(o.createdAt))}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-[#FA8C00]">
+                    {ulti.formatVND(o.totalPrice)}
+                  </p>
+                  <span
+                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[o.status]}`}
+                  >
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${statusDot[o.status]}`}
+                    />
+                    {o.status}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full">
-            <thead className="bg-gray-50">
-              <tr className="bg-orange-50">
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  Mã đơn
-                </th>
-                <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  Khách hàng
-                </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  SL
-                </th>
-                <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  Tổng tiền
-                </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  Trạng thái
-                </th>
-                <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  Ngày tạo
-                </th>
-                {/* <th className="px-6 py-4 text-center text-xs font-semibold uppercase tracking-wider text-orange-500">
-                  Thao tác
-                </th> */}
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-gray-100">
-              {recent.length > 0 ? (
-                recent.map((order) => (
-                  <tr
-                    key={order.orderId}
-                    className="transition-colors hover:bg-orange-50"
-                  >
-                    {/* Mã đơn */}
-                    <td className="px-6 py-4">
-                      <span className="rounded-full bg-orange-100 px-2.5 py-1 text-sm font-bold text-orange-600 shadow-sm">
-                        #{order.orderId}
-                      </span>
-                    </td>
-
-                    {/* Khách hàng */}
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100 text-xs font-bold text-orange-600 shadow-sm">
-                          {order.userId}
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-gray-600">
-                            User #{order.userId}
-                          </span>
-                          <span className="text-xs text-gray-400">
-                            {order.phone}
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* SL */}
-                    <td className="px-6 py-4 text-center">
-                      <span className="rounded-full bg-orange-100 px-2.5 py-1 text-sm font-semibold text-orange-600 shadow-sm">
-                        {order.totalQuantity}
-                      </span>
-                    </td>
-
-                    {/* Tổng tiền */}
-                    <td className="px-6 py-4 text-right">
-                      <span className="font-bold text-orange-600">
-                        {ulti.formatVND(order.totalPrice)}
-                      </span>
-                    </td>
-
-                    {/* Trạng thái */}
-                    <td className="px-6 py-4 text-center">{order.status}</td>
-
-                    {/* Ngày tạo */}
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-sm text-gray-600">
-                        {new Date(order.createdAt).toLocaleString("vi-VN")}
-                      </span>
-                    </td>
-
-                    {/* Thao tác */}
-                    {/* <td className="px-6 py-4 text-center">
-                      <Button
-                        asChild
-                        size="sm"
-                        variant="ghost"
-                        className="bg-orange-100 text-orange-600 shadow-sm hover:bg-orange-200 hover:text-orange-600"
-                      >
-                        <Link
-                          to="/in-phieu-che-bien"
-                          search={{ order: order.orderId }}
-                        >
-                          <Printer className="mr-1 h-4 w-4" /> In phiếu
-                        </Link>
-                      </Button>
-                    </td> */}
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={7} className="py-12 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <ShoppingBag className="h-10 w-10 text-orange-200" />
-                      <p className="text-gray-600">Chưa có đơn hàng nào.</p>
+        {/* Low ingredients */}
+        <div className="rounded-2xl border border-[#FFE7BA] bg-white p-5 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-bold text-[#5B3A0A]">
+              Cảnh báo nguyên liệu sắp hết
+            </h2>
+            <Link
+              to="/staff/ingredients"
+              className="flex items-center gap-1 text-xs font-semibold text-[#FA8C00] hover:underline"
+            >
+              Quản lý kho <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {lowIngredientsList.length === 0 && (
+              <p className="py-6 text-center text-sm text-gray-400">
+                Tất cả nguyên liệu đều đủ.
+              </p>
+            )}
+            {lowIngredientsList.map((i) => {
+              const out = i.currentStock === 0;
+              return (
+                <div
+                  key={i.id}
+                  className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5"
+                >
+                  <div className="flex items-center gap-2">
+                    <AlertTriangle
+                      className={`h-4 w-4 ${out ? "text-rose-500" : "text-amber-500"}`}
+                    />
+                    <div>
+                      <p className="text-sm font-semibold text-[#5B3A0A]">
+                        {i.name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        Còn {i.currentStock} {i.unit} / tối thiểu 10 {i.unit}
+                      </p>
                     </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                  </div>
+                  <span
+                    className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${out ? "border-rose-200 bg-rose-50 text-rose-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}
+                  >
+                    {out ? "Hết hàng" : "Sắp hết"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </>

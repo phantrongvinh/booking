@@ -128,10 +128,8 @@ const productAPI = {
   fetchProduct,
   fetchProductById,
   fetchProductByCategory,
-
   createProduct,
   deleteProduct,
-
   updatePrice,
   updateNameCategory,
   updateDescription,
@@ -139,6 +137,8 @@ const productAPI = {
   updateImage,
   updateStorageInstructions,
   updateSizeName,
+  fetchProductBySearch,
+ 
 };
 
 export default productAPI;

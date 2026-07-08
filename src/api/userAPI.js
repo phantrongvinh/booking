@@ -12,8 +12,14 @@ const updateProfile = async (form) => {
   return data;
 };
 
+const fetchUsers = async () => {
+  const { data } = await axiosClient.get("/users");
+  return data;
+};
+
 const userAPI = {
   fetchMe,
   updateProfile,
+  fetchUsers,
 };
 export default userAPI;

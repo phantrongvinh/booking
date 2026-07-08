@@ -1,309 +1,258 @@
-import { useDispatch, useSelector } from "react-redux";
-import ButtonCustom from "../ButtonCustom";
-import * as yup from "yup";
+import { useCallback, useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useSubmit } from "@/hook/customHook";
-import { clearMessage, updateProfile } from "@/store/slices/userSlice";
-import { useEffect, useRef, useState } from "react";
-import dayjs from "dayjs";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { Controller } from "react-hook-form";
+import * as yup from "yup";
+import { Save } from "lucide-react";
+import { useFetch, useSubmit } from "@/hook/customHook";
+import { fetchMe, updateProfile } from "@/store/slices/userSlice";
+import ToastNotification from "../admin/ToastNotification";
 
-const Profile = () => {
-  // handle fetch user
+const getInitials = (name) =>
+  (name || "")
+    .trim()
+    .split(/\s+/)
+    .slice(-2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+
+// Chuyển ISO datetime -> "YYYY-MM-DD" cho input type="date"
+const toDateInputValue = (iso) => {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return "";
+  return d.toISOString().slice(0, 10);
+};
+
+const schema = yup.object({
+  fullName: yup.string().trim().required("Vui lòng nhập họ tên."),
+  phone: yup
+    .string()
+    .trim()
+    .matches(/^0\d{9,10}$/, {
+      message: "Số điện thoại không hợp lệ.",
+      excludeEmptyString: true,
+    })
+    .nullable(),
+  birthday: yup.string().nullable(),
+  gender: yup.string().nullable(),
+  address: yup.string().nullable(),
+});
+
+const field =
+  "w-full rounded-xl border border-[#FFE7BA] bg-white px-3.5 py-2.5 text-sm text-[#5B3A0A] outline-none transition-colors placeholder:text-gray-400 focus:border-[#FA8C00] focus:ring-2 focus:ring-[#FA8C00]/20";
+const labelCls = "mb-1.5 block text-xs font-semibold text-gray-500";
+const errorCls = "mt-1 text-xs font-medium text-rose-600";
+
+const ProfilePage = () => {
   const dispatch = useDispatch();
+  const [toast, setToast] = useState(null);
+
+  const fetchMeCallback = useCallback(async () => {
+    const res = await dispatch(fetchMe()).unwrap();
+    return { profile: res };
+  }, [dispatch]);
+
   const {
-    user,
-    message,
-    error: storeError,
-  } = useSelector((state) => state.user);
-
-  // handle validate user
-  const today = new Date();
-
-  const minBirthday = new Date();
-  minBirthday.setFullYear(today.getFullYear() - 13);
-
-  const schema = yup.object({
-    fullName: yup
-      .string()
-      .required("Vui lòng nhập họ tên")
-      .min(2, "Họ tên tối thiểu 2 ký tự"),
-    email: yup
-      .string()
-      .required("Vui lòng nhập email")
-      .email("Email không hợp lệ"),
-    phone: yup
-      .string()
-      .required("Vui lòng nhập số điện thoại")
-      .matches(/^(0[3|5|7|8|9])+([0-9]{8})$/, "Số điện thoại không hợp lệ"),
-    birthday: yup
-      .date()
-      .typeError("Vui lòng chọn ngày sinh")
-      .required("Ngày sinh không được để trống")
-      .max(today, "Ngày sinh không được lớn hơn ngày hiện tại")
-      .max(minBirthday, "Người dùng phải từ 13 tuổi trở lên"),
-
-    gender: yup.string().required("Vui lòng chọn giới tính"),
-
-    address: yup.string().trim().required("Địa chỉ không được để trống"),
-
-    avatarUrl: yup.string().required("Vui lòng chọn ảnh đại diện"),
+    data: { profile },
+    fetch: reloadProfile,
+  } = useFetch(fetchMeCallback, {
+    initialData: { profile: { fullName: "", avatarUrl: null } },
   });
-
-  // handle upload avatar
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef(null);
-  const [avatarPreview, setAvatarPreview] = useState("");
-
-  const handleUploadAvatar = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Preview
-    setAvatarPreview(URL.createObjectURL(file));
-
-    // Nếu backend nhận Base64
-    const reader = new FileReader();
-    reader.onload = () => {
-      setValue("avatarUrl", reader.result, {
-        shouldValidate: true,
-      });
-    };
-    reader.readAsDataURL(file);
-  };
 
   const {
     register,
     handleSubmit,
-    setValue,
-    control,
+    reset,
+    watch,
     formState: { errors, isDirty },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      fullName: user?.fullName ?? "",
-      email: user?.email ?? "",
-      phone: user?.phone ?? "",
-      birthday: user?.birthday ? dayjs(user?.birthday).toISOString() : null,
-      gender: user?.gender ?? "",
-      address: user?.address ?? "",
-      avatarUrl: user?.avatarUrl ?? "",
+      fullName: "",
+      phone: "",
+      birthday: "",
+      gender: "",
+      address: "",
     },
   });
 
-  const { submit, loading } = useSubmit((data) => {
-    if (!isDirty) {
-      console.log("không thay đổi");
-      return;
-    }
-    const payload = {
-      fullName: data.fullName,
-      birthday: data.birthday ? dayjs(data.birthday).toISOString() : null,
-      gender: data.gender,
-      address: data.address,
-      avatarUrl: data.avatarUrl || null,
-      phone: data.phone,
-    };
-
-    return dispatch(updateProfile(payload)).unwrap();
-  });
-
-  // handle clear message
+  // Khi profile fetch xong (hoặc đổi), đồng bộ vào form
   useEffect(() => {
-    if (!message) return;
+    if (profile?.profileId) {
+      reset({
+        fullName: profile.fullName ?? "",
+        phone: profile.phone ?? "",
+        birthday: toDateInputValue(profile.birthday),
+        gender: profile.gender ?? "",
+        address: profile.address ?? "",
+      });
+    }
+  }, [profile?.profileId]);
 
-    const timer = setTimeout(() => {
-      dispatch(clearMessage());
-    }, 3000);
+  const { submit, loading: saving } = useSubmit(
+    async (data) => {
+      // Không gửi avatarUrl - đổi ảnh dùng API riêng
+      await dispatch(
+        updateProfile({
+          fullName: data.fullName,
+          phone: data.phone,
+          birthday: data.birthday
+            ? new Date(data.birthday).toISOString()
+            : null,
+          gender: data.gender,
+          address: data.address,
+        }),
+      ).unwrap();
+    },
+    {
+      onSuccess: () => {
+        reloadProfile();
+        setToast({
+          message: "Cập nhật thông tin cá nhân thành công!",
+          type: "success",
+        });
+      },
+      onError: (err) => {
+        const message =
+          typeof err === "string" ? err : "Cập nhật thất bại, thử lại sau.";
+        setToast({ message, type: "error" });
+      },
+    },
+  );
 
-    return () => clearTimeout(timer);
-  }, [message, dispatch]);
+  const fullNameValue = watch("fullName");
 
   return (
-    <>
-      <h2 className="text-2xl font-bold text-[#6B4E41] mb-6">
-        Thông tin cá nhân
-      </h2>
-
-      {message && (
-        <p className="text-green-600 bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-          {message}
+    <div>
+      <div className="mb-5">
+        <h1 className="text-2xl font-bold text-[#5B3A0A]">Thông tin cá nhân</h1>
+        <p className="text-sm text-gray-500">
+          Cập nhật thông tin hồ sơ của bạn.
         </p>
-      )}
-
-      {storeError && (
-        <p className="text-red-500 bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-          {storeError}
-        </p>
-      )}
+      </div>
 
       <form
         onSubmit={handleSubmit(submit)}
-        className="max-w-5xl mx-auto space-y-6"
+        className="rounded-2xl border border-[#FFE7BA] bg-white p-6 shadow-sm"
       >
-        {/* Avatar */}
-        <div className="flex flex-col items-center">
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleUploadAvatar}
-          />
-
-          <img
-            src={
-              avatarPreview ||
-              user?.avatarUrl ||
-              "https://placehold.co/150x150?text=Avatar"
-            }
-            alt="Avatar"
-            onClick={() => fileInputRef.current?.click()}
-            className="
-          w-28 h-28
-          sm:w-32 sm:h-32
-          md:w-36 md:h-36
-          rounded-full
-          object-cover
-          border-2 border-gray-300
-          cursor-pointer
-          hover:opacity-80
-          transition
-        "
-          />
-
-          <p className="text-sm text-gray-500 mt-3">Nhấn vào ảnh để thay đổi</p>
-
-          <input type="hidden" {...register("avatarUrl")} />
-
-          {errors.avatarUrl && (
-            <p className="text-red-500 text-sm mt-2">
-              {errors.avatarUrl.message}
-            </p>
+        <div className="mb-6 flex items-center gap-4">
+          {profile.avatarUrl ? (
+            <img
+              src={profile.avatarUrl}
+              alt={profile.fullName}
+              className="h-16 w-16 rounded-2xl object-cover"
+            />
+          ) : (
+            <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#FA8C00] text-xl font-bold text-white">
+              {getInitials(fullNameValue)}
+            </span>
           )}
+          <div>
+            <p className="font-bold text-[#5B3A0A]">
+              {fullNameValue || "Khách hàng"}
+            </p>
+            <p className="text-sm text-gray-400">{profile.email}</p>
+          </div>
         </div>
 
-        {/* Form */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="font-medium">Họ tên</label>
+            <label className={labelCls}>Họ và tên</label>
             <input
+              className={field}
+              placeholder="Nguyễn Văn A"
               {...register("fullName")}
-              className="w-full border rounded-lg p-3 mt-1"
             />
             {errors.fullName && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.fullName.message}
-              </p>
+              <p className={errorCls}>{errors.fullName.message}</p>
             )}
           </div>
 
           <div>
-            <label className="font-medium">Email</label>
+            <label className={labelCls}>Số điện thoại</label>
             <input
-              {...register("email")}
-              disabled
-              className="w-full border rounded-lg p-3 mt-1 bg-gray-100 cursor-not-allowed"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="font-medium">Số điện thoại</label>
-            <input
+              className={field}
+              placeholder="09xxxxxxxx"
               {...register("phone")}
-              className="w-full border rounded-lg p-3 mt-1"
             />
-            {errors.phone && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.phone.message}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col">
-            <label className="font-medium">Ngày sinh</label>
-
-            <Controller
-              name="birthday"
-              control={control}
-              render={({ field }) => (
-                <DatePicker
-                  selected={field.value ? new Date(field.value) : null}
-                  onChange={(date) => field.onChange(date)}
-                  dateFormat="dd/MM/yyyy"
-                  maxDate={new Date()}
-                  placeholderText="Chọn ngày sinh"
-                  className="w-full border rounded-lg p-3 mt-1"
-                  showMonthDropdown
-                  showYearDropdown
-                  dropdownMode="select"
-                />
-              )}
-            />
-
-            {errors.birthday && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.birthday.message}
-              </p>
-            )}
+            {errors.phone && <p className={errorCls}>{errors.phone.message}</p>}
           </div>
 
           <div>
-            <label className="font-medium">Giới tính</label>
-
-            <select
-              {...register("gender")}
-              className="w-full border rounded-lg p-3 mt-1"
-            >
-              <option value="">-- Chọn giới tính --</option>
-              <option value="MALE">Nam</option>
-              <option value="FEMALE">Nữ</option>
-              <option value="OTHER">Khác</option>
-            </select>
-
-            {errors.gender && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.gender.message}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label className="font-medium">Địa chỉ</label>
-
+            <label className={labelCls}>Email</label>
             <input
-              {...register("address")}
-              className="w-full border rounded-lg p-3 mt-1"
+              type="email"
+              className={field + " cursor-not-allowed bg-gray-50 text-gray-400"}
+              value={profile.email ?? ""}
+              readOnly
+              disabled
             />
+          </div>
 
-            {errors.address && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.address.message}
-              </p>
-            )}
+          <div>
+            <label className={labelCls}>Ngày sinh</label>
+            <input type="date" className={field} {...register("birthday")} />
+          </div>
+
+          <div>
+            <label className={labelCls}>Giới tính</label>
+            <select className={field} {...register("gender")}>
+              <option value="">Chưa chọn</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+              <option value="Khác">Khác</option>
+            </select>
+          </div>
+
+          <div className="sm:col-span-2">
+            <label className={labelCls}>Địa chỉ</label>
+            <input
+              className={field}
+              placeholder="Số nhà, đường, quận, thành phố"
+              {...register("address")}
+            />
           </div>
         </div>
 
-        <div className="flex justify-end">
-          <ButtonCustom
-            name={loading ? "Đang lưu..." : "Thay đổi"}
-            size="lg"
-            color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00]"
+        <div className="mt-6 flex items-center justify-end gap-3">
+          <button
+            type="button"
+            disabled={!isDirty}
+            onClick={() =>
+              reset({
+                fullName: profile.fullName ?? "",
+                phone: profile.phone ?? "",
+                birthday: toDateInputValue(profile.birthday),
+                gender: profile.gender ?? "",
+                address: profile.address ?? "",
+              })
+            }
+            className="rounded-xl border border-[#FFE7BA] px-4 py-2.5 text-sm font-semibold text-gray-500 transition-all hover:bg-[#FFF7E6] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Hoàn tác
+          </button>
+          <button
             type="submit"
-            disabled={loading}
-          />
+            disabled={!isDirty || saving}
+            className="inline-flex items-center gap-2 rounded-xl bg-[#FA8C00] px-5 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#e07f00] disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Save className="h-4 w-4" />{" "}
+            {saving ? "Đang lưu..." : "Lưu thay đổi"}
+          </button>
         </div>
       </form>
-    </>
+
+      {toast && (
+        <ToastNotification
+          key={toast.message + Date.now()}
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
+    </div>
   );
 };
 
-export default Profile;
+export default ProfilePage;
