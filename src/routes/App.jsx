@@ -8,7 +8,7 @@ import ProductDetail from "@/pages/ProductDetail";
 import Notfound from "@/pages/Notfound";
 import ForgotPassword from "@/pages/ForgotPassword";
 import VerifyOtp from "@/pages/VerifyOtp";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import ScrollToTop from "./ScrollToTop";
 import Profile from "@/components/account/Profile";
 import AccountLayout from "@/pages/layout/AccountLayout";
@@ -29,6 +29,7 @@ import AdStaff from "@/pages/AdStaff";
 import AdOrder from "@/pages/AdOrder";
 import AdProduct from "@/pages/AdProduct";
 import AdminLayout from "@/pages/layout/AdminLayout";
+import AdIngredient from "@/pages/AdIngredient";
 
 function App() {
   return (
@@ -109,6 +110,7 @@ function App() {
           <Route path="adstaff" element={<AdStaff />} />
           <Route path="adorder" element={<AdOrder />} />
           <Route path="adproduct" element={<AdProduct />} />
+          <Route path="adingredient" element={<AdIngredient />} />
         </Route>
 
         {/* Route không tồn tại */}

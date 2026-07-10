@@ -257,7 +257,7 @@ const AdProduct = () => {
         />
       </div>
 
-      <div className="space-y-4 rounded-2xl border bg-white p-5">
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <ProductToolbar
           categories={categories}
           selectedCategory={selectedCategory}
