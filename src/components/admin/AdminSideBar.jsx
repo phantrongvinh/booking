@@ -19,7 +19,7 @@ const navItems = [
   { to: "/admin", label: "Tổng Quan", icon: LayoutDashboard, end: true },
   { to: "/admin/adorder", label: "Đơn hàng", icon: ShoppingBag, end: true },
   { to: "/admin/adproduct", label: "Sản phẩm", icon: Cake, end: true },
-  { to: "/admin/ingredients", label: "Nguyên liệu", icon: Wheat, end: true },
+  { to: "/admin/adingredient", label: "Nguyên liệu", icon: Wheat, end: true },
   { to: "/admin/aduser", label: "Khách hàng", icon: User, end: true },
   { to: "/admin/adstaff", label: "Nhân viên", icon: UserPen, end: true },
   { to: "/admin/vouchers", label: "Voucher", icon: Ticket, end: true },
