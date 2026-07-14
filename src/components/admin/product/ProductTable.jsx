@@ -1,6 +1,13 @@
-import { Eye, Pencil, Ban } from "lucide-react";
+import { Eye, Pencil, Ban, FlaskConical } from "lucide-react";
 
-const ProductTable = ({ products, loading, onDelete, onView, onEdit }) => {
+const ProductTable = ({
+  products,
+  loading,
+  onDelete,
+  onView,
+  onEdit,
+  onAddIngredient,
+}) => {
   if (loading) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white py-14 text-center text-slate-500">
@@ -88,6 +95,14 @@ const ProductTable = ({ products, loading, onDelete, onView, onEdit }) => {
                 {/* Action */}
                 <td className="px-4 py-4">
                   <div className="flex justify-center gap-4">
+                    <button
+                      onClick={() => onAddIngredient(p)}
+                      className="text-green-600 transition hover:scale-110"
+                      title="Thêm nguyên liệu"
+                    >
+                      <FlaskConical size={17} />
+                    </button>
+
                     <button
                       onClick={() => onView(p)}
                       className="text-blue-600 transition hover:scale-110"
