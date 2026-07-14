@@ -3,48 +3,52 @@ import { Eye, Pencil, Ban } from "lucide-react";
 const ProductTable = ({ products, loading, onDelete, onView, onEdit }) => {
   if (loading) {
     return (
-      <div className="rounded-2xl border bg-white p-10 text-center">
+      <div className="rounded-xl border border-slate-200 bg-white py-14 text-center text-slate-500">
         Đang tải sản phẩm...
       </div>
     );
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border bg-white">
+    <div className="overflow-x-auto">
       <table className="w-full">
-        <thead className="bg-gray-50 text-sm">
+        <thead className="border-b bg-slate-50 text-xs font-semibold uppercase tracking-wide text-slate-500">
           <tr>
-            <th className="p-4 text-left">Mã SP</th>
-            <th className="p-4 text-left">Sản phẩm</th>
-            <th>Danh mục</th>
-            <th>Giá bán</th>
-            <th>Tồn kho</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
+            <th className="px-6 py-4 text-left">Mã SP</th>
+            <th className="px-6 py-4 text-left">Sản phẩm</th>
+            <th className="px-4 py-4 text-left">Danh mục</th>
+            <th className="px-4 py-4 text-center">Giá bán</th>
+            <th className="px-4 py-4 text-center">Tồn kho</th>
+            <th className="px-4 py-4 text-center">Trạng thái</th>
+            <th className="px-4 py-4 text-center">Hành động</th>
           </tr>
         </thead>
 
         <tbody>
           {products.length > 0 ? (
             products.map((p) => (
-              <tr key={p.productId} className="border-t hover:bg-gray-50">
-                {/* Mã sản phẩm */}
-                <td className="p-4 font-semibold text-blue-600">
+              <tr
+                key={p.productId}
+                className="border-t border-slate-100 transition hover:bg-slate-50"
+              >
+                {/* Mã */}
+                <td className="px-6 py-4 font-semibold text-blue-600">
                   SP{String(p.productId).padStart(5, "0")}
                 </td>
 
-                {/* Thông tin sản phẩm */}
-                <td className="p-4">
+                {/* Thông tin */}
+                <td className="px-6 py-4">
                   <div className="flex items-center gap-3">
                     <img
                       src={p.imageUrl}
                       alt={p.name}
-                      className="h-14 w-14 rounded-lg border object-cover"
+                      className="h-14 w-14 rounded-lg border border-slate-200 object-cover"
                     />
 
                     <div>
-                      <p className="font-semibold">{p.name}</p>
-                      <p className="text-sm text-gray-500 line-clamp-1">
+                      <p className="font-semibold text-slate-800">{p.name}</p>
+
+                      <p className="mt-1 line-clamp-1 text-sm text-slate-500">
                         {p.description}
                       </p>
                     </div>
@@ -52,42 +56,57 @@ const ProductTable = ({ products, loading, onDelete, onView, onEdit }) => {
                 </td>
 
                 {/* Danh mục */}
-                <td>{p.categoryName}</td>
+                <td className="px-4 py-4 text-slate-700">{p.categoryName}</td>
 
                 {/* Giá */}
-                <td className="font-semibold text-orange-600">
-                  {new Intl.NumberFormat("vi-VN").format(p.price)}đ
+                <td className="px-4 py-4 text-center font-semibold text-slate-800">
+                  {Number(p.price).toLocaleString("vi-VN")}đ
                 </td>
 
                 {/* Tồn kho */}
-                <td>{p.stockQuantity}</td>
+                <td
+                  className={`px-4 py-4 text-center font-semibold ${
+                    p.stockQuantity <= 10 ? "text-red-500" : "text-slate-700"
+                  }`}
+                >
+                  {p.stockQuantity}
+                </td>
 
                 {/* Trạng thái */}
-                <td>
+                <td className="px-4 py-4 text-center">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
                       p.status === "Active"
-                        ? "bg-green-100 text-green-600"
-                        : "bg-red-100 text-red-600"
+                        ? "bg-green-100 text-green-700"
+                        : "bg-slate-200 text-slate-600"
                     }`}
                   >
-                    {p.status === "Active" ? "Đang bán" : "Ngừng kinh doanh"}
+                    {p.status === "Active" ? "Đang bán" : "Ngừng bán"}
                   </span>
                 </td>
 
-                {/* Hành động */}
-                <td>
-                  <div className="flex justify-center gap-3">
-                    <button onClick={() => onView(p)}>
-                      <Eye />
+                {/* Action */}
+                <td className="px-4 py-4">
+                  <div className="flex justify-center gap-4">
+                    <button
+                      onClick={() => onView(p)}
+                      className="text-blue-600 transition hover:scale-110"
+                    >
+                      <Eye size={17} />
                     </button>
 
-                    <button onClick={() => onEdit(p)}>
-                      <Pencil />
+                    <button
+                      onClick={() => onEdit(p)}
+                      className="text-slate-600 transition hover:scale-110"
+                    >
+                      <Pencil size={17} />
                     </button>
 
-                    <button onClick={() => onDelete(p.productId)}>
-                      <Ban className="h-4 w-4 text-red-500 hover:scale-110 transition" />
+                    <button
+                      onClick={() => onDelete(p.productId)}
+                      className="text-red-500 transition hover:scale-110"
+                    >
+                      <Ban size={17} />
                     </button>
                   </div>
                 </td>
@@ -95,7 +114,7 @@ const ProductTable = ({ products, loading, onDelete, onView, onEdit }) => {
             ))
           ) : (
             <tr>
-              <td colSpan={7} className="py-10 text-center text-gray-500">
+              <td colSpan={7} className="py-14 text-center text-slate-500">
                 Chưa có sản phẩm nào.
               </td>
             </tr>
