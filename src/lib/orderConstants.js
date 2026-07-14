@@ -40,3 +40,10 @@ export const cancelReasons = [
   "Muốn thay đổi địa chỉ giao hàng",
   "Lý do khác",
 ];
+
+export const statusFlow = [
+  "Chờ xác nhận",
+  "Đang làm",
+  "Đang giao",
+  "Hoàn thành",
+];

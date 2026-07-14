@@ -1,11 +1,5 @@
-import OrderStatusCard from "./OrderSuccessModal";
-
 const Notification = () => {
-  return (
-    <>
-      <OrderStatusCard />
-    </>
-  );
+  return <>Noti</>;
 };
 
 export default Notification;

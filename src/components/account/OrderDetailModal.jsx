@@ -11,6 +11,7 @@ import {
 } from "@/lib/orderConstants";
 import ulti from "@/ultis/ulti";
 import { cancelMyOrder, confirmMyOrder } from "@/store/slices/userSlice";
+import OrderStatusStepper from "./OrderStatusStepper";
 
 const INITIAL_DATA = { order: null };
 
@@ -136,6 +137,10 @@ const OrderDetailModal = ({ orderId, onClose, onActionDone }) => {
               />
               {order.status}
             </span>
+
+            <div className="pt-1">
+              <OrderStatusStepper status={order.status} />
+            </div>
 
             <div className="flex items-start gap-2 rounded-xl bg-[#FFFBF2] p-3 text-sm text-[#5B3A0A]">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[#FA8C00]" />

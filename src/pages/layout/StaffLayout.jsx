@@ -13,7 +13,7 @@ const StaffLayout = () => {
 
         {/* Content */}
         <div className="flex flex-1 flex-col bg-[#FFFBF2]">
-          <main className="flex-1 p-4 md:p-6 lg:p-8 mt-12">
+          <main className="flex-1 p-4 md:p-6 lg:p-8">
             <Outlet />
           </main>
         </div>

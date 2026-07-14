@@ -13,7 +13,7 @@ import Pagination from "../Pagination";
 import OrderDetailModal from "./OrderDetailModal";
 import ToastNotification from "../admin/ToastNotification";
 
-const PER_PAGE = 5;
+const PER_PAGE = 3;
 const INITIAL_DATA = { orders: [] };
 
 const MyOrdersPage = () => {
@@ -158,6 +158,8 @@ const MyOrdersPage = () => {
           currentPage={current}
           totalPages={totalPages}
           onChange={setPage}
+          totalItems={orders.length}
+          pageSize={PER_PAGE}
         />
       </div>
 

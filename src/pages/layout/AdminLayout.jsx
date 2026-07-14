@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import AdminHeader from "./AdminHeader";
 import AdminSideBar from "@/components/admin/AdminSideBar";
 
 const AdminLayout = () => {
@@ -9,8 +8,6 @@ const AdminLayout = () => {
         <AdminSideBar />
 
         <div className="flex flex-1 flex-col">
-          <AdminHeader />
-
           <main className="flex-1 p-6 overflow-auto ">
             <Outlet />
           </main>

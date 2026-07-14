@@ -15,14 +15,19 @@ const nav = [
     icon: ShoppingBag,
     exact: false,
   },
+  // {
+  //   to: "/account/favorites",
+  //   label: "Sản phẩm yêu thích",
+  //   icon: Heart,
+  //   exact: false,
+  // },
+  { to: "/account/vouchers", label: "Kho voucher", icon: Ticket, exact: false },
   {
-    to: "/account/favorites",
-    label: "Sản phẩm yêu thích",
-    icon: Heart,
+    to: "/account/change-password",
+    label: "Đổi mật khẩu",
+    icon: Lock,
     exact: false,
   },
-  { to: "/account/vouchers", label: "Kho voucher", icon: Ticket, exact: false },
-  { to: "/account/password", label: "Đổi mật khẩu", icon: Lock, exact: false },
 ];
 
 const AccountLayout = () => {

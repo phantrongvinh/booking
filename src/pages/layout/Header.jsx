@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import productAPI from "../../api/productAPI";
 import { debounce } from "lodash";
+import { useSiteSettings } from "@/hook/useSettingSite";
 const navItems = [
   { label: "Trang chủ", to: "/" },
   { label: "Thực đơn", to: "/menu" },
@@ -91,9 +92,12 @@ export default function Header() {
   // notification
   const notifications = [];
   const unread = notifications.filter((n) => !n.isRead).length;
+
+  // website
+  const { headerColor, headerTopColor } = useSiteSettings();
   return (
     <>
-      <div className="py-1 bg-[#FFC13B]">
+      <div className="py-1" style={{ backgroundColor: headerTopColor }}>
         <div className="container mx-auto flex justify-around items-center">
           <div className="font-bold text-sm">Hotline: 000 000 000</div>
           <div className="font-bold text-sm flex gap-3">
@@ -102,8 +106,8 @@ export default function Header() {
           </div>
         </div>
       </div>
-      <header className="w-full sticky top-0 z-[100]">
-        <div className="bg-[#FFF8E8]">
+      <header className="w-full sticky top-0 z-20">
+        <div style={{ backgroundColor: headerColor }}>
           <div className="container mx-auto py-2 grid grid-cols-3">
             {/* Logo - Đã cập nhật link ảnh */}
             <div className="shrink-0">

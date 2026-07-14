@@ -1,5 +1,7 @@
 // const Footer = () => {};
 
+import { useSiteSettings } from "@/hook/useSettingSite";
+
 // export default Footer;
 // import { Youtube, Twitter, LinkedinIcon } from "lucide-react";
 
@@ -63,6 +65,7 @@ function MapIcon(props) {
 }
 
 export default function Footer() {
+  const { footerColor, footerCopyrightColor } = useSiteSettings();
   return (
     <footer className="w-full">
       {/* Scallop top */}
@@ -79,7 +82,7 @@ export default function Footer() {
       </div>
 
       {/* Thay đổi phần này vào code của bạn */}
-      <div className="bg-[#FFF3D6]">
+      <div style={{ backgroundColor: footerColor }}>
         <div className="mx-auto px-10 pt-16 pb-16 grid grid-cols-1 md:grid-cols-[1fr_auto_auto_auto_1fr] gap-x-12 gap-y-8 text-[#2B1B12] ">
           {/* Cột 1: Logo, Slogan, Socials */}
           <div className="flex flex-col items-center text-center gap-3">
@@ -127,7 +130,10 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="w-full bg-[#FF7A00]/50 py-5 text-center">
+        <div
+          className="w-full py-5 text-center"
+          style={{ backgroundColor: footerCopyrightColor, opacity: 0.5 }}
+        >
           <p className="text-sm font-semibold text-[#2B1B12]">
             © 2026 TÊN CỬA HÀNG . Tất cả quyền được bảo lưu.
           </p>
