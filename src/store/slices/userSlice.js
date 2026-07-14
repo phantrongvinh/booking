@@ -76,6 +76,18 @@ export const confirmMyOrder = createAsyncThunk(
   },
 );
 
+export const changePassword = createAsyncThunk(
+  "user/changePassword",
+  async (form, { rejectWithValue }) => {
+    try {
+      const res = await userAPI.changePassword(form);
+      return res;
+    } catch (error) {
+      return rejectWithValue("Đổi mật khẩu thất bại");
+    }
+  },
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {

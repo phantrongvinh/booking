@@ -24,7 +24,7 @@ const navItems = [
   { to: "/admin/adstaff", label: "Nhân viên", icon: UserPen, end: true },
   { to: "/admin/vouchers", label: "Voucher", icon: Ticket, end: true },
   { to: "/admin/blogs", label: "Bài viết", icon: ScrollText, end: true },
-  { to: "/admin/web", label: "Quản lý web", icon: Globe, end: true },
+  { to: "/admin/adweb", label: "Quản lý web", icon: Globe, end: true },
 ];
 
 const AdminSideBar = ({ onNavigate }) => {

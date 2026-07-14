@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-  baseURL: "https://bookingbakery.onrender.com/api",
+  baseURL: import.meta.env.VITE_API_URL,
   responseType: "json",
   headers: {
     "Content-Type": "application/json",

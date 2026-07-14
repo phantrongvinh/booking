@@ -29,6 +29,8 @@ import AdStaff from "@/pages/AdStaff";
 import AdOrder from "@/pages/AdOrder";
 import AdProduct from "@/pages/AdProduct";
 import AdminLayout from "@/pages/layout/AdminLayout";
+import ChangePassword from "@/components/account/ChangePassword";
+import AdWebSite from "@/pages/AdWebsite";
 
 function App() {
   return (
@@ -74,10 +76,11 @@ function App() {
             }
           >
             <Route index element={<Profile />} />
-            <Route path="notification" element={<Notification />} />
+            <Route path="notifications" element={<Notification />} />
             <Route path="orders" element={<Order />} />
             <Route path="address" element={<Addresses />} />
             <Route path="voucher" element={<MyVoucher />} />
+            <Route path="change-password" element={<ChangePassword />} />
           </Route>
         </Route>
 
@@ -109,6 +112,7 @@ function App() {
           <Route path="adstaff" element={<AdStaff />} />
           <Route path="adorder" element={<AdOrder />} />
           <Route path="adproduct" element={<AdProduct />} />
+          <Route path="adweb" element={<AdWebSite />} />
         </Route>
 
         {/* Route không tồn tại */}

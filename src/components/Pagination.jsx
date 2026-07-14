@@ -24,7 +24,7 @@ const Pagination = ({
     <div className="flex flex-wrap items-center justify-between gap-3 border-t border-[#FFE7BA] px-4 py-4">
       {hasCount && (
         <span className="text-xs text-gray-500">
-          Hiển thị {startItem}-{endItem} trong tổng {totalItems} sản phẩm
+          Hiển thị {startItem} - {endItem} trong tổng {totalItems} danh mục
         </span>
       )}
 
