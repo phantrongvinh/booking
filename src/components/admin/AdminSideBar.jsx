@@ -9,6 +9,7 @@ import {
   Ticket,
   ScrollText,
   Globe,
+  CirclePercent,
 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
@@ -22,7 +23,13 @@ const navItems = [
   { to: "/admin/adingredient", label: "Nguyên liệu", icon: Wheat, end: true },
   { to: "/admin/aduser", label: "Khách hàng", icon: User, end: true },
   { to: "/admin/adstaff", label: "Nhân viên", icon: UserPen, end: true },
-  { to: "/admin/vouchers", label: "Voucher", icon: Ticket, end: true },
+  { to: "/admin/advouchers", label: "Voucher", icon: Ticket, end: true },
+  {
+    to: "/admin/promotions",
+    label: "Khuyến mãi",
+    icon: CirclePercent,
+    end: true,
+  },
   { to: "/admin/blogs", label: "Bài viết", icon: ScrollText, end: true },
   { to: "/admin/adweb", label: "Quản lý web", icon: Globe, end: true },
 ];

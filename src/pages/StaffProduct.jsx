@@ -298,15 +298,21 @@ const StaffProduct = () => {
                     </td>
                     <td className="px-4 py-3">{renderStockWarning(p.name)}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${
-                          p.status === "stock"
-                            ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                            : "border-gray-200 bg-gray-50 text-gray-500"
-                        }`}
-                      >
-                        {p.status === "stock" ? "Còn hàng" : "Hết hàng"}
-                      </span>
+                      {p.stockQuantity < 10 ? (
+                        <span className="rounded-full border px-2 py-0.5 text-xs font-semibold border-amber-200 bg-amber-50 text-amber-700">
+                          Còn {p.stockQuantity}
+                        </span>
+                      ) : (
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${
+                            p.status === "stock"
+                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
+                              : "border-gray-200 bg-gray-50 text-gray-500"
+                          }`}
+                        >
+                          {p.status === "stock" ? "Còn hàng" : "Hết hàng"}
+                        </span>
+                      )}
                     </td>
                   </tr>
                 ))
@@ -396,6 +402,10 @@ const StaffProduct = () => {
         onClose={() => setModalOpen(false)}
         product={selected}
         recipe={selected ? recipeMap[selected.name] : null}
+        onIngredientAdded={(productName) => {
+          recipeLoadedRef.current.delete(productName);
+          loadRecipe(productName);
+        }}
       />
       {toast && (
         <ToastNotification

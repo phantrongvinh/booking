@@ -6,6 +6,7 @@ import productReducer from "./slices/productSlice";
 import userReducer from "./slices/userSlice";
 import orderReducer from "./slices/orderSlice";
 import ingredientReducer from "./slices/ingredientSlice";
+import voucherReducer from "./slices/voucherSlice";
 
 const loadCart = () => {
   try {
@@ -44,6 +45,7 @@ export const store = configureStore({
     user: userReducer,
     order: orderReducer,
     ingredient: ingredientReducer,
+    voucher: voucherReducer,
   },
 
   preloadedState: {

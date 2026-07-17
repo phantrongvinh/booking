@@ -1,4 +1,11 @@
 import { X, AlertTriangle, XCircle, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import { useState, useCallback } from "react";
+import { useDispatch } from "react-redux";
+import { useFetch, useSubmit } from "@/hook/customHook";
+import { fetchAllIngredient } from "@/store/slices/ingredientSlice";
+import ToastNotification from "../admin/ToastNotification";
+import { linkProductIngredient } from "@/store/slices/productSlice";
 
 const LOW_STOCK = 10;
 
@@ -29,7 +36,92 @@ const levelConfig = {
   },
 };
 
-export default function ProductModal({ open, onClose, product, recipe }) {
+export default function ProductModal({
+  open,
+  onClose,
+  product,
+  recipe,
+  onIngredientAdded,
+}) {
+  const dispatch = useDispatch();
+  const [toast, setToast] = useState(null);
+
+  const fetchIngredientsCallback = useCallback(async () => {
+    const ingredients = await dispatch(fetchAllIngredient()).unwrap();
+    return { ingredients };
+  }, [dispatch]);
+
+  const {
+    data: { ingredients: allIngredients },
+  } = useFetch(fetchIngredientsCallback, {
+    initialData: { ingredients: [] },
+  });
+
+  const [rows, setRows] = useState([
+    { ingredientName: "", quantityRequired: 1 },
+  ]);
+  const [formError, setFormError] = useState("");
+
+  const addRow = () =>
+    setRows((prev) => [...prev, { ingredientName: "", quantityRequired: 1 }]);
+
+  const removeRow = (idx) =>
+    setRows((prev) => prev.filter((_, i) => i !== idx));
+
+  const updateRow = (idx, patch) =>
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+
+  const addIngredientCallback = useCallback(
+    async (payload) => {
+      for (const item of payload) {
+        await dispatch(
+          linkProductIngredient({
+            productName: product.name,
+            ingredientName: item.ingredientName,
+            quantityRequired: item.quantityRequired,
+          }),
+        ).unwrap();
+      }
+    },
+    [dispatch, product],
+  );
+
+  const { submit: submitIngredients, loading: adding } = useSubmit(
+    addIngredientCallback,
+    {
+      onSuccess: () => {
+        setRows([{ ingredientName: "", quantityRequired: 1 }]);
+        setFormError("");
+        onIngredientAdded?.(product.name);
+        setToast({ message: "Thêm nguyên liệu thành công", type: "success" });
+      },
+      onError: (err) => {
+        const message =
+          typeof err === "string" ? err : "Thêm nguyên liệu thất bại.";
+        setToast({ message, type: "error" });
+      },
+    },
+  );
+
+  const handleSubmitIngredients = () => {
+    setFormError("");
+    const invalidRow = rows.find(
+      (r) => !r.ingredientName || r.quantityRequired <= 0,
+    );
+    if (invalidRow) {
+      setFormError(
+        "Vui lòng chọn nguyên liệu và nhập số lượng hợp lệ cho tất cả các dòng.",
+      );
+      return;
+    }
+    const duplicateNames = rows.map((r) => r.ingredientName);
+    if (new Set(duplicateNames).size !== duplicateNames.length) {
+      setFormError("Không được chọn trùng nguyên liệu trong cùng lượt thêm.");
+      return;
+    }
+    submitIngredients(rows);
+  };
+
   if (!open || !product) return null;
 
   const price = product.salePrice ?? product.price;
@@ -131,6 +223,77 @@ export default function ProductModal({ open, onClose, product, recipe }) {
               </div>
             )}
           </div>
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-sm font-semibold text-[#5B3A0A]">
+                Thêm nguyên liệu
+              </p>
+              <button
+                type="button"
+                onClick={addRow}
+                className="inline-flex items-center gap-1 rounded-lg bg-[#FFF2DC] px-2.5 py-1.5 text-xs font-semibold text-[#FA8C00] hover:bg-[#FFE7BA]"
+              >
+                <Plus className="h-3.5 w-3.5" /> Thêm nguyên liệu
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {rows.map((row, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <select
+                    value={row.ingredientName}
+                    onChange={(e) =>
+                      updateRow(idx, { ingredientName: e.target.value })
+                    }
+                    className="h-9 flex-1 rounded-lg border border-[#FFE7BA] bg-white px-2 text-sm outline-none focus:border-[#FA8C00]"
+                  >
+                    <option value="">-- Chọn nguyên liệu --</option>
+                    {allIngredients.map((ing) => (
+                      <option key={ing.ingredientId} value={ing.name}>
+                        {ing.name} ({ing.unit})
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="number"
+                    min={0.01}
+                    step="any"
+                    value={row.quantityRequired}
+                    onChange={(e) =>
+                      updateRow(idx, {
+                        quantityRequired: Number(e.target.value),
+                      })
+                    }
+                    className="h-9 w-24 rounded-lg border border-[#FFE7BA] bg-white px-2 text-sm text-center outline-none focus:border-[#FA8C00]"
+                  />
+                  {rows.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removeRow(idx)}
+                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-rose-200 text-rose-500 hover:bg-rose-50"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {formError && (
+              <p className="mt-2 text-xs font-medium text-rose-600">
+                {formError}
+              </p>
+            )}
+
+            <button
+              type="button"
+              onClick={handleSubmitIngredients}
+              disabled={adding}
+              className="mt-3 w-full rounded-lg bg-[#FA8C00] px-4 py-2 text-sm font-semibold text-white hover:bg-[#E07E00] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {adding ? "Đang lưu..." : "Lưu nguyên liệu"}
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-end border-t border-[#FFE7BA] px-6 py-4">
@@ -142,6 +305,13 @@ export default function ProductModal({ open, onClose, product, recipe }) {
           </button>
         </div>
       </div>
+      {toast && (
+        <ToastNotification
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
