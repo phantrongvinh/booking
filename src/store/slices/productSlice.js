@@ -1,5 +1,5 @@
 import productAPI from "@/api/productAPI";
-import productIngredientAPI from "@/api/productIngredient";
+import productIngredientAPI from "@/api/productIngredientAPI";
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 export const fetchAllProduct = createAsyncThunk(

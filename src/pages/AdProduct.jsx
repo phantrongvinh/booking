@@ -13,6 +13,7 @@ import { Plus } from "lucide-react";
 import { useFetch } from "@/hook/customHook";
 import productAPI from "@/api/productAPI";
 import categoryAPI from "@/api/categoryAPI";
+import productIngredientAPI from "@/api/productIngredientAPI";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -49,14 +50,40 @@ const AdProduct = () => {
   // =========================
   const handleSubmitProduct = async (data) => {
     try {
-      // CREATE
+      // =========================
+      // ADD INGREDIENT
+      // =========================
+      if (popupMode === "addIngredient") {
+        const payload = {
+          productId: selectedProduct.productId,
+          ingredientId: Number(data.ingredientId), 
+          quantityRequired: Number(data.quantityRequired),
+        };
+
+        console.log("ADD INGREDIENT:", payload);
+
+        await productIngredientAPI.createProductIngredient(payload);
+
+        alert("Thêm nguyên liệu thành công");
+
+        setOpenPopup(false);
+        setSelectedProduct(null);
+
+        return;
+      }
+
+      // =========================
+      // CREATE PRODUCT
+      // =========================
       if (popupMode === "create") {
         await productAPI.createProduct(data);
 
         alert("Thêm sản phẩm thành công");
       }
 
-      // EDIT
+      // =========================
+      // EDIT PRODUCT
+      // =========================
       if (popupMode === "edit") {
         const id = selectedProduct.productId;
 
@@ -101,6 +128,21 @@ const AdProduct = () => {
           requests.push(productAPI.updateImage(id, data.image));
         }
 
+        // UPDATE INGREDIENTS
+        if (data.ingredients) {
+          const ingredientPayload = data.ingredients.map((item) => ({
+            productId: id,
+            ingredientId: Number(item.ingredientId),
+            quantityRequired: Number(item.quantityRequired),
+          }));
+
+          console.log("UPDATE INGREDIENT:", ingredientPayload);
+
+          requests.push(
+            productIngredientAPI.updateProductIngredient(ingredientPayload),
+          );
+        }
+
         await Promise.all(requests);
 
         alert("Cập nhật sản phẩm thành công");
@@ -109,7 +151,6 @@ const AdProduct = () => {
       setOpenPopup(false);
       setSelectedProduct(null);
 
-      // reload danh sách sản phẩm
       await reloadProducts();
     } catch (error) {
       console.log(error);
@@ -117,7 +158,9 @@ const AdProduct = () => {
       alert(
         popupMode === "create"
           ? "Thêm sản phẩm thất bại"
-          : "Cập nhật sản phẩm thất bại",
+          : popupMode === "addIngredient"
+            ? "Thêm nguyên liệu thất bại"
+            : "Cập nhật sản phẩm thất bại",
       );
     }
   };
@@ -137,6 +180,12 @@ const AdProduct = () => {
   const handleOpenEdit = (product) => {
     setSelectedProduct(product);
     setPopupMode("edit");
+    setOpenPopup(true);
+  };
+
+  const handleOpenAddIngredient = (product) => {
+    setSelectedProduct(product);
+    setPopupMode("addIngredient");
     setOpenPopup(true);
   };
 
@@ -273,6 +322,7 @@ const AdProduct = () => {
           onView={handleOpenView}
           onEdit={handleOpenEdit}
           onDelete={handleDeleteProduct}
+          onAddIngredient={handleOpenAddIngredient}
         />
 
         <ProductPagination

@@ -1,7 +1,7 @@
-import { useFetch } from "@/hook/customHook";
+import { useFetch, useFetchParams } from "@/hook/customHook";
 import customerAPI from "@/api/customerAPI";
 import { Search, Eye, Users, UserPlus, TrendingUp, X } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 // ── Avatar chữ cái đầu ──────────────────────────────────────────────────────
 const getInitials = (name) => {
@@ -52,6 +52,16 @@ const StatCard = ({ icon: Icon, label, value, change, changeColor, iconBg }) => 
 const CustomerDetailModal = ({ customer, onClose }) => {
   if (!customer) return null;
 
+  const { data: detail, loading } = useFetch(
+    () => customerAPI.fetchCustomerByUserId(customer.userId),
+    {
+      initialData: customer,
+      immediate: true,
+    }
+  );
+
+  const displayCustomer = detail || customer;
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";
     return new Date(dateStr).toLocaleDateString("vi-VN");
@@ -73,33 +83,38 @@ const CustomerDetailModal = ({ customer, onClose }) => {
 
         {/* Avatar + Name */}
         <div className="mb-6 flex flex-col items-center gap-3 text-center">
-          {customer.avatarUrl ? (
+          {displayCustomer.avatarUrl ? (
             <img
-              src={customer.avatarUrl}
-              alt={customer.fullName}
+              src={displayCustomer.avatarUrl}
+              alt={displayCustomer.fullName}
               className="h-20 w-20 rounded-full border-2 border-border object-cover"
             />
           ) : (
             <div
-              className={`flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white ${getAvatarColor(customer.fullName)}`}
+              className={`flex h-20 w-20 items-center justify-center rounded-full text-2xl font-bold text-white ${getAvatarColor(displayCustomer.fullName)}`}
             >
-              {getInitials(customer.fullName)}
+              {getInitials(displayCustomer.fullName)}
             </div>
           )}
           <div>
-            <h2 className="text-lg font-bold">{customer.fullName || "Chưa cập nhật"}</h2>
-            <p className="text-sm text-muted-foreground">ID: #{customer.userId}</p>
+            <h2 className="text-lg font-bold">{displayCustomer.fullName || "Chưa cập nhật"}</h2>
+            <p className="text-sm text-muted-foreground">ID: #{displayCustomer.userId}</p>
           </div>
         </div>
 
         {/* Info */}
-        <div className="space-y-3 text-sm">
-          <InfoRow label="Username" value={customer.username} />
-          <InfoRow label="Email" value={customer.email} />
-          <InfoRow label="Điện thoại" value={customer.phone} />
-          <InfoRow label="Giới tính" value={customer.gender} />
-          <InfoRow label="Ngày sinh" value={formatDate(customer.birthday)} />
-          <InfoRow label="Địa chỉ" value={customer.address} />
+        <div className="relative space-y-3 text-sm">
+          {loading && (
+            <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/65 backdrop-blur-[1px] rounded-xl">
+              <div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-blue-500" />
+            </div>
+          )}
+          <InfoRow label="Username" value={displayCustomer.username} />
+          <InfoRow label="Email" value={displayCustomer.email} />
+          <InfoRow label="Điện thoại" value={displayCustomer.phone} />
+          <InfoRow label="Giới tính" value={displayCustomer.gender} />
+          <InfoRow label="Ngày sinh" value={formatDate(displayCustomer.birthday)} />
+          <InfoRow label="Địa chỉ" value={displayCustomer.address} />
         </div>
       </div>
     </div>
@@ -115,32 +130,45 @@ const InfoRow = ({ label, value }) => (
 
 // ── Main page ────────────────────────────────────────────────────────────────
 const AdUser = () => {
+  // ── Search & filter ──
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [genderFilter, setGenderFilter] = useState("all");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedQuery(query);
+    }, 400);
+    return () => clearTimeout(handler);
+  }, [query]);
+
+  const searchParams = useMemo(() => {
+    const params = {};
+    if (debouncedQuery) params.Name = debouncedQuery;
+    if (genderFilter !== "all") params.Gender = genderFilter;
+    return params;
+  }, [debouncedQuery, genderFilter]);
+
   const {
     data: customers,
     loading,
-  } = useFetch(() => customerAPI.fetchCustomers(), {
-    initialData: [],
-  });
-
-  // ── Search & filter ──
-  const [query, setQuery] = useState("");
-  const [genderFilter, setGenderFilter] = useState("all");
+  } = useFetchParams(
+    async (params) => {
+      if (!params.Name && !params.Gender) {
+        return await customerAPI.fetchCustomers();
+      }
+      return await customerAPI.searchCustomers(params);
+    },
+    searchParams,
+    {
+      initialData: [],
+    }
+  );
 
   const filteredCustomers = useMemo(() => {
     if (!customers || !Array.isArray(customers)) return [];
-    return customers.filter((c) => {
-      const matchSearch =
-        !query ||
-        c.fullName?.toLowerCase().includes(query.toLowerCase()) ||
-        c.email?.toLowerCase().includes(query.toLowerCase()) ||
-        c.phone?.includes(query) ||
-        c.username?.toLowerCase().includes(query.toLowerCase());
-
-      const matchGender = genderFilter === "all" || c.gender === genderFilter;
-
-      return matchSearch && matchGender;
-    });
-  }, [customers, query, genderFilter]);
+    return customers;
+  }, [customers]);
 
   // ── Pagination ──
   const [currentPage, setCurrentPage] = useState(1);
