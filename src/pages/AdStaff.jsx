@@ -14,82 +14,8 @@ import {
 import StaffModal from "@/components/admin/StaffModal";
 import DeleteConfirmModal from "@/components/admin/DeleteConfirmModal";
 import ToastNotification from "@/components/admin/ToastNotification";
-
-// Dữ liệu mẫu ban đầu của nhân viên
-const initialStaffList = [
-  {
-    id: "NV-001",
-    fullName: "Phạm Trần Minh Anh",
-    role: "Quản lý",
-    phone: "0912345678",
-    email: "minhanh@booking.com",
-    status: "Hoạt động",
-    createdAt: "2026-01-10",
-  },
-  {
-    id: "NV-002",
-    fullName: "Nguyễn Hoàng Nam",
-    role: "Thu ngân",
-    phone: "0987654321",
-    email: "namnh@booking.com",
-    status: "Hoạt động",
-    createdAt: "2026-02-15",
-  },
-  {
-    id: "NV-003",
-    fullName: "Trần Thị Mai",
-    role: "Đầu bếp",
-    phone: "0905123456",
-    email: "maitt@booking.com",
-    status: "Hoạt động",
-    createdAt: "2026-02-20",
-  },
-  {
-    id: "NV-004",
-    fullName: "Lê Văn Hùng",
-    role: "Nhân viên phục vụ",
-    phone: "0934567890",
-    email: "hunglv@booking.com",
-    status: "Tạm khóa",
-    createdAt: "2026-03-01",
-  },
-  {
-    id: "NV-005",
-    fullName: "Nguyễn Thị Lan",
-    role: "Nhân viên pha chế",
-    phone: "0978123456",
-    email: "lannt@booking.com",
-    status: "Hoạt động",
-    createdAt: "2026-03-05",
-  },
-  {
-    id: "NV-006",
-    fullName: "Vũ Minh Đức",
-    role: "Giao hàng",
-    phone: "0967890123",
-    email: "ducvm@booking.com",
-    status: "Hoạt động",
-    createdAt: "2026-03-12",
-  },
-  {
-    id: "NV-007",
-    fullName: "Đặng Hồng Nhung",
-    role: "Thu ngân",
-    phone: "0923456789",
-    email: "nhungdh@booking.com",
-    status: "Hoạt động",
-    createdAt: "2026-04-02",
-  },
-  {
-    id: "NV-008",
-    fullName: "Hoàng Văn Khánh",
-    role: "Đầu bếp",
-    phone: "0945678901",
-    email: "khanhhv@booking.com",
-    status: "Tạm khóa",
-    createdAt: "2026-04-10",
-  },
-];
+import staffAPI from "@/api/staffAPI";
+import { useFetch } from "@/hook/customHook";
 
 // Helper lấy chữ cái đầu để vẽ Avatar
 const getInitials = (name) => {
@@ -118,7 +44,6 @@ const getAvatarColor = (name) => {
 
 const AdStaff = () => {
   // --- States ---
-  const [staffList, setStaffList] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -142,25 +67,28 @@ const AdStaff = () => {
   // Hidden File input ref for mock file upload
   const fileInputRef = useRef(null);
 
-  // --- Load & Save Local Storage ---
-  useEffect(() => {
-    const stored = localStorage.getItem("booking_staff_list");
-    if (stored) {
-      try {
-        setStaffList(JSON.parse(stored));
-      } catch (e) {
-        setStaffList(initialStaffList);
-      }
-    } else {
-      setStaffList(initialStaffList);
-      localStorage.setItem("booking_staff_list", JSON.stringify(initialStaffList));
-    }
-  }, []);
+  // --- Fetch staff list from backend ---
+  const {
+    data: staffData,
+    loading: staffLoading,
+    fetch: refetchStaffs,
+  } = useFetch(() => staffAPI.fetchStaffs(), {
+    initialData: [],
+  });
 
-  const saveToStorage = (newList) => {
-    setStaffList(newList);
-    localStorage.setItem("booking_staff_list", JSON.stringify(newList));
-  };
+  const staffList = useMemo(() => {
+    if (!staffData || !Array.isArray(staffData)) return [];
+    return staffData.map((s) => ({
+      ...s,
+      id: s.userId || s.id || `NV-${s.userId}`,
+      fullName: s.fullName || s.username || "Chưa cập nhật",
+      role: s.role || "Nhân viên phục vụ",
+      status: s.status || "Hoạt động",
+      email: s.email || "—",
+      phone: s.phone || "—",
+      createdAt: s.createdAt || "—",
+    }));
+  }, [staffData]);
 
   // --- Show Toast message ---
   const showToast = (message, type = "success") => {
@@ -181,9 +109,9 @@ const AdStaff = () => {
       const matchSearch =
         !searchQuery ||
         staff.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        staff.phone.includes(searchQuery) ||
-        staff.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        staff.id.toLowerCase().includes(searchQuery.toLowerCase());
+        staff.phone?.includes(searchQuery) ||
+        staff.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        String(staff.id).toLowerCase().includes(searchQuery.toLowerCase());
 
       const matchRole = roleFilter === "all" || staff.role === roleFilter;
       const matchStatus = statusFilter === "all" || staff.status === statusFilter;
@@ -235,40 +163,53 @@ const AdStaff = () => {
     setIsStaffModalOpen(true);
   };
 
-  const handleOpenEditModal = (staff, e) => {
+  const handleOpenEditModal = async (staff, e) => {
     e.stopPropagation();
-    setEditStaff(staff);
-    setIsStaffModalOpen(true);
+    try {
+      showToast("Đang tải thông tin chi tiết...");
+      const detail = await staffAPI.fetchStaffByUserId(staff.id);
+      setEditStaff(detail || staff);
+      setIsStaffModalOpen(true);
+    } catch (err) {
+      console.error(err);
+      setEditStaff(staff);
+      setIsStaffModalOpen(true);
+    }
   };
 
-  const handleSaveStaff = (formData) => {
+  const handleSaveStaff = async (formData) => {
     if (editStaff) {
       // Edit mode
-      const updated = staffList.map((item) =>
-        item.id === editStaff.id ? { ...item, ...formData } : item,
-      );
-      saveToStorage(updated);
-      showToast(`Cập nhật thông tin nhân viên ${formData.fullName} thành công!`);
+      try {
+        const payload = {
+          fullName: formData.fullName,
+          phone: formData.phone,
+          gender: formData.gender || "Nam",
+          address: formData.address || "",
+          birthday: formData.birthday || new Date().toISOString()
+        };
+        await staffAPI.updateStaffProfile(payload);
+        showToast(`Cập nhật thông tin nhân viên ${formData.fullName} thành công!`);
+        refetchStaffs();
+      } catch (err) {
+        showToast("Không thể cập nhật nhân viên (Yêu cầu tài khoản chính chủ)", "error");
+      }
     } else {
       // Add mode
-      // Generate custom ID (NV-xxx)
-      let nextNum = 1;
-      if (staffList.length > 0) {
-        const ids = staffList.map((s) => {
-          const match = s.id.match(/NV-(\d+)/);
-          return match ? parseInt(match[1], 10) : 0;
+      try {
+        const username = formData.email.split("@")[0];
+        const password = "StaffPassword123@";
+        await staffAPI.registerStaff({
+          username,
+          email: formData.email,
+          password,
+          phone: formData.phone
         });
-        nextNum = Math.max(...ids) + 1;
+        showToast(`Đã thêm nhân viên mới ${formData.fullName}! Mật khẩu mặc định: ${password}`);
+        refetchStaffs();
+      } catch (err) {
+        showToast(err.response?.data?.message || "Lỗi tạo tài khoản nhân viên", "error");
       }
-      const newId = `NV-${String(nextNum).padStart(3, "0")}`;
-
-      const newStaff = {
-        id: newId,
-        ...formData,
-        createdAt: new Date().toISOString().split("T")[0],
-      };
-      saveToStorage([newStaff, ...staffList]);
-      showToast(`Đã thêm nhân viên mới ${formData.fullName}!`);
     }
     setIsStaffModalOpen(false);
   };
@@ -286,17 +227,25 @@ const AdStaff = () => {
     setIsDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (deleteTarget === "batch") {
-      const updated = staffList.filter((s) => !selectedIds.includes(s.id));
-      saveToStorage(updated);
-      showToast(`Đã xóa thành công ${selectedIds.length} nhân viên được chọn.`);
-      setSelectedIds([]);
+      try {
+        await Promise.all(selectedIds.map((id) => staffAPI.deleteStaff(id)));
+        showToast(`Đã xóa thành công ${selectedIds.length} nhân viên được chọn.`);
+        setSelectedIds([]);
+        refetchStaffs();
+      } catch (err) {
+        showToast("Lỗi khi xóa danh sách nhân viên", "error");
+      }
     } else if (deleteTarget) {
-      const updated = staffList.filter((s) => s.id !== deleteTarget.id);
-      saveToStorage(updated);
-      showToast(`Đã xóa nhân viên ${deleteTarget.fullName} khỏi hệ thống.`);
-      setSelectedIds((prev) => prev.filter((id) => id !== deleteTarget.id));
+      try {
+        await staffAPI.deleteStaff(deleteTarget.id);
+        showToast(`Đã xóa nhân viên ${deleteTarget.fullName} khỏi hệ thống.`);
+        setSelectedIds((prev) => prev.filter((id) => id !== deleteTarget.id));
+        refetchStaffs();
+      } catch (err) {
+        showToast(`Lỗi khi xóa nhân viên ${deleteTarget.fullName}`, "error");
+      }
     }
     setIsDeleteModalOpen(false);
   };
@@ -306,59 +255,45 @@ const AdStaff = () => {
     fileInputRef.current.click();
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     showToast("Đang tải lên và phân tích tệp danh sách...", "success");
 
-    // Giả lập xử lý đọc file
-    setTimeout(() => {
-      let nextNum = 1;
-      if (staffList.length > 0) {
-        const ids = staffList.map((s) => {
-          const match = s.id.match(/NV-(\d+)/);
-          return match ? parseInt(match[1], 10) : 0;
-        });
-        nextNum = Math.max(...ids) + 1;
-      }
-
-      const importedStaff = [
+    try {
+      const mockImports = [
         {
-          id: `NV-${String(nextNum).padStart(3, "0")}`,
           fullName: "Lâm Quốc Khánh",
           role: "Đầu bếp",
           phone: "0909112233",
           email: "khanhlq@booking.com",
-          status: "Hoạt động",
-          createdAt: new Date().toISOString().split("T")[0],
         },
         {
-          id: `NV-${String(nextNum + 1).padStart(3, "0")}`,
           fullName: "Tạ Tuyết Trinh",
           role: "Thu ngân",
           phone: "0988554433",
           email: "trinhtt@booking.com",
-          status: "Hoạt động",
-          createdAt: new Date().toISOString().split("T")[0],
-        },
-        {
-          id: `NV-${String(nextNum + 2).padStart(3, "0")}`,
-          fullName: "Hoàng Gia Bảo",
-          role: "Nhân viên phục vụ",
-          phone: "0933778899",
-          email: "baohg@booking.com",
-          status: "Tạm khóa",
-          createdAt: new Date().toISOString().split("T")[0],
-        },
+        }
       ];
 
-      const updated = [...importedStaff, ...staffList];
-      saveToStorage(updated);
-      showToast("Tải lên thành công! Đã thêm 3 nhân viên mới vào hệ thống.");
-      // Clear file input
+      await Promise.all(
+        mockImports.map(item =>
+          staffAPI.registerStaff({
+            username: item.email.split("@")[0],
+            email: item.email,
+            password: "StaffPassword123@",
+            phone: item.phone
+          })
+        )
+      );
+
+      showToast("Nhập danh sách nhân viên từ tệp thành công!");
+      refetchStaffs();
       e.target.value = "";
-    }, 1500);
+    } catch (err) {
+      showToast("Lỗi nhập dữ liệu nhân viên từ tệp", "error");
+    }
   };
 
   return (
@@ -558,7 +493,16 @@ const AdStaff = () => {
             </thead>
 
             <tbody className="divide-y divide-border bg-white">
-              {currentStaffPage.length === 0 ? (
+              {staffLoading ? (
+                <tr>
+                  <td colSpan={6} className="py-16 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="h-8 w-8 animate-spin rounded-full border-4 border-muted border-t-[#FA8C00]" />
+                      <span className="text-sm text-gray-500">Đang tải danh sách nhân viên…</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : currentStaffPage.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-16 text-center text-gray-400">
                     Không có dữ liệu nhân viên nào khớp với bộ lọc.

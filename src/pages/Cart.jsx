@@ -6,7 +6,7 @@ import CartItem from "@/components/cart/CartItem";
 import CartSummary from "@/components/cart/CartSummary";
 import RecommendedProducts from "@/components/cart/RecommendedProducts";
 
-import voucherList from "@/mockData/voucher";
+import voucherAPI from "@/api/voucherAPI";
 import cartAPI from "@/api/cartAPI";
 
 import {
@@ -22,6 +22,8 @@ const Cart = () => {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [userVouchers, setUserVouchers] = useState([]);
+  const [apiDiscount, setApiDiscount] = useState(0);
 
   const cartItems = useSelector((state) => state.cart?.cartItems ?? []);
 
@@ -33,13 +35,11 @@ const Cart = () => {
 
   const shippingFee = useSelector((state) => state.cart?.shippingFee ?? 0);
 
-  // ================= FETCH CART =================
+  // ================= FETCH DATA =================
   const fetchCart = async () => {
     try {
       setLoading(true);
-
       const data = await cartAPI.fetchCart();
-
       dispatch(setCartItems(data?.items ?? []));
     } catch (error) {
       console.error(error);
@@ -48,8 +48,23 @@ const Cart = () => {
     }
   };
 
+  const fetchUserVouchers = async () => {
+    try {
+      const data = await voucherAPI.fetchUnusedVouchers();
+      if (Array.isArray(data)) {
+        setUserVouchers(data.map((v) => ({
+          ...v,
+          discount: v.discountValue || v.discount || 0,
+        })));
+      }
+    } catch (error) {
+      console.error("Lỗi tải voucher:", error);
+    }
+  };
+
   useEffect(() => {
     fetchCart();
+    fetchUserVouchers();
   }, []);
 
   // ================= CRUD SINGLE ITEM =================
@@ -131,9 +146,44 @@ const Cart = () => {
     0,
   );
 
-  const discount = selectedVoucher?.discount ?? 0;
+  const discount = apiDiscount;
 
-  const total = subtotal + shippingFee - discount;
+  const total = Math.max(0, subtotal + shippingFee - discount);
+
+  // Tự động tính toán hoặc cập nhật lại giá giảm khi giỏ hàng hoặc voucher thay đổi
+  useEffect(() => {
+    if (selectedVoucher) {
+      const reapplyVoucher = async () => {
+        try {
+          setLoading(true);
+          const result = await voucherAPI.applyVoucher({
+            voucherCode: selectedVoucher.code,
+          });
+          const discountValue =
+            result?.discountAmount ||
+            result?.discountValue ||
+            result?.discount ||
+            selectedVoucher.discountValue ||
+            selectedVoucher.discount ||
+            0;
+          setApiDiscount(discountValue);
+        } catch (error) {
+          console.error(error);
+          const errMsg =
+            error.response?.data?.message ||
+            `Voucher ${selectedVoucher.code} không còn áp dụng được cho đơn hàng này.`;
+          alert(errMsg);
+          setApiDiscount(0);
+          dispatch(setVoucher(null));
+        } finally {
+          setLoading(false);
+        }
+      };
+      reapplyVoucher();
+    } else {
+      setApiDiscount(0);
+    }
+  }, [subtotal, selectedVoucher?.code, dispatch]);
 
   // ================= HANDLERS =================
   const handleVoucherChange = (voucher) => {
@@ -210,7 +260,7 @@ const Cart = () => {
           total={total}
           voucher={selectedVoucher}
           setVoucher={handleVoucherChange}
-          voucherList={voucherList}
+          voucherList={userVouchers}
           onCheckout={handleCheckout}
         />
       </div>
