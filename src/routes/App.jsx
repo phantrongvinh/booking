@@ -32,6 +32,7 @@ import AdminLayout from "@/pages/layout/AdminLayout";
 import ChangePassword from "@/components/account/ChangePassword";
 import AdWebSite from "@/pages/AdWebsite";
 import AdIngredient from "@/pages/AdIngredient";
+import AdVoucher from "@/pages/AdVoucher";
 
 function App() {
   return (
@@ -115,6 +116,7 @@ function App() {
           <Route path="adproduct" element={<AdProduct />} />
           <Route path="adweb" element={<AdWebSite />} />
           <Route path="adingredient" element={<AdIngredient />} />
+          <Route path="advouchers" element={<AdVoucher />} />
         </Route>
 
         {/* Route không tồn tại */}
