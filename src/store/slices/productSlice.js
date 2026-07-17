@@ -63,6 +63,44 @@ export const getProductIngredientByProductName = createAsyncThunk(
   },
 );
 
+export const updateProductIngredientQuantity = createAsyncThunk(
+  "product/updateIngredientQuantity",
+  async (
+    { productId, ingredientId, quantityRequired },
+    { rejectWithValue },
+  ) => {
+    try {
+      const res = await productIngredientAPI.updateProductIngredient(
+        productId,
+        ingredientId,
+        quantityRequired,
+      );
+      return res;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ?? "Cập nhật số lượng thất bại",
+      );
+    }
+  },
+);
+
+export const deleteProductIngredient = createAsyncThunk(
+  "product/deleteIngredient",
+  async ({ productId, ingredientId }, { rejectWithValue }) => {
+    try {
+      const res = await productIngredientAPI.removeProductIngredient(
+        productId,
+        ingredientId,
+      );
+      return res;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ?? "Xóa nguyên liệu thất bại",
+      );
+    }
+  },
+);
+
 const productSlice = createSlice({
   name: "product",
   initialState: {
