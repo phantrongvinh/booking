@@ -1,11 +1,22 @@
-import { X, AlertTriangle, XCircle, CheckCircle2 } from "lucide-react";
+import {
+  X,
+  AlertTriangle,
+  XCircle,
+  CheckCircle2,
+  Check,
+  Pencil,
+} from "lucide-react";
 import { Plus, Trash2 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { useFetch, useSubmit } from "@/hook/customHook";
 import { fetchAllIngredient } from "@/store/slices/ingredientSlice";
 import ToastNotification from "../admin/ToastNotification";
-import { linkProductIngredient } from "@/store/slices/productSlice";
+import {
+  deleteProductIngredient,
+  linkProductIngredient,
+  updateProductIngredientQuantity,
+} from "@/store/slices/productSlice";
 
 const LOW_STOCK = 10;
 
@@ -57,6 +68,15 @@ export default function ProductModal({
     initialData: { ingredients: [] },
   });
 
+  //
+  const ingredientIdByName = useMemo(() => {
+    const map = {};
+    allIngredients.forEach((ing) => {
+      map[ing.name] = ing.ingredientId;
+    });
+    return map;
+  }, [allIngredients]);
+
   const [rows, setRows] = useState([
     { ingredientName: "", quantityRequired: 1 },
   ]);
@@ -76,7 +96,7 @@ export default function ProductModal({
       for (const item of payload) {
         await dispatch(
           linkProductIngredient({
-            productName: product.name,
+            productName: product?.name,
             ingredientName: item.ingredientName,
             quantityRequired: item.quantityRequired,
           }),
@@ -92,7 +112,7 @@ export default function ProductModal({
       onSuccess: () => {
         setRows([{ ingredientName: "", quantityRequired: 1 }]);
         setFormError("");
-        onIngredientAdded?.(product.name);
+        onIngredientAdded?.(product?.name);
         setToast({ message: "Thêm nguyên liệu thành công", type: "success" });
       },
       onError: (err) => {
@@ -122,15 +142,116 @@ export default function ProductModal({
     submitIngredients(rows);
   };
 
-  if (!open || !product) return null;
+  // ----- Sửa số lượng nguyên liệu hiện có -----
+  const [editingName, setEditingName] = useState(null);
+  const [editQuantity, setEditQuantity] = useState("");
 
+  const startEdit = (ing) => {
+    setEditingName(ing.ingredientName);
+    setEditQuantity(String(ing.quantityRequired));
+  };
+
+  const cancelEdit = () => {
+    setEditingName(null);
+    setEditQuantity("");
+  };
+
+  const updateQuantityCallback = useCallback(
+    async ({ ingredientId, quantityRequired }) => {
+      await dispatch(
+        updateProductIngredientQuantity({
+          productId: product?.productId,
+          ingredientId,
+          quantityRequired,
+        }),
+      ).unwrap();
+    },
+    [dispatch, product],
+  );
+
+  const { submit: submitUpdateQuantity, loading: updatingQuantity } = useSubmit(
+    updateQuantityCallback,
+    {
+      onSuccess: () => {
+        cancelEdit();
+        onIngredientAdded?.(product?.name);
+        setToast({ message: "Đã cập nhật số lượng.", type: "success" });
+      },
+      onError: (err) => {
+        setToast({
+          message: typeof err === "string" ? err : "Cập nhật thất bại.",
+          type: "error",
+        });
+      },
+    },
+  );
+
+  const handleSaveQuantity = (ing) => {
+    const qty = Number(editQuantity);
+    if (!qty || qty <= 0) {
+      setToast({ message: "Số lượng phải lớn hơn 0.", type: "error" });
+      return;
+    }
+    const ingredientId = ingredientIdByName[ing.ingredientName];
+    if (!ingredientId) {
+      setToast({ message: "Không tìm thấy ID nguyên liệu.", type: "error" });
+      return;
+    }
+    submitUpdateQuantity({ ingredientId, quantityRequired: qty });
+  };
+
+  // ----- Xóa nguyên liệu khỏi sản phẩm -----
+  const deleteIngredientCallback = useCallback(
+    async ({ ingredientId }) => {
+      await dispatch(
+        deleteProductIngredient({
+          productId: product?.productId,
+          ingredientId,
+        }),
+      ).unwrap();
+    },
+    [dispatch, product],
+  );
+
+  const { submit: submitDeleteIngredient, loading: deletingIngredient } =
+    useSubmit(deleteIngredientCallback, {
+      onSuccess: () => {
+        onIngredientAdded?.(product?.name);
+        setToast({
+          message: "Đã xóa nguyên liệu khỏi sản phẩm.",
+          type: "success",
+        });
+      },
+      onError: (err) => {
+        setToast({
+          message: typeof err === "string" ? err : "Xóa nguyên liệu thất bại.",
+          type: "error",
+        });
+      },
+    });
+
+  const handleDeleteIngredient = (ing) => {
+    const ingredientId = ingredientIdByName[ing.ingredientName];
+    if (!ingredientId) {
+      setToast({ message: "Không tìm thấy ID nguyên liệu.", type: "error" });
+      return;
+    }
+    if (!window.confirm(`Xóa "${ing.ingredientName}" khỏi sản phẩm này?`))
+      return;
+    submitDeleteIngredient({ ingredientId });
+  };
+
+  if (!open || !product) return null;
   const price = product.salePrice ?? product.price;
   const ingredients = recipe?.ingredients ?? [];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div
+        className="relative z-10 flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between border-b border-[#FFE7BA] px-6 py-4">
           <h3 className="text-lg font-bold text-[#5B3A0A]">
             Chi tiết sản phẩm
@@ -195,28 +316,84 @@ export default function ProductModal({
                   const level = getIngredientLevel(ing.currentStock);
                   const cfg = levelConfig[level];
                   const Icon = cfg.icon;
+                  const isEditing = editingName === ing.ingredientName;
                   return (
                     <div
                       key={ing.ingredientName}
-                      className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2"
+                      className="flex flex-nowrap items-center justify-between gap-2 rounded-lg border border-[#FFE7BA] px-3 py-2"
                     >
-                      <div className="flex items-center gap-2">
-                        <Icon className={`h-4 w-4 ${cfg.cls}`} />
-                        <div>
-                          <p className="text-sm font-medium text-[#5B3A0A]">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        <Icon className={`h-4 w-4 shrink-0 ${cfg.cls}`} />
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-[#5B3A0A]">
                             {ing.ingredientName}
                           </p>
-                          <p className="text-xs text-gray-400">
-                            Cần {ing.quantityRequired} {ing.unit} / sản phẩm ·
-                            Tồn kho {ing.currentStock} {ing.unit}
-                          </p>
+                          {isEditing ? (
+                            <div className="mt-1 flex items-center gap-1.5">
+                              <input
+                                type="number"
+                                min={0.01}
+                                step="any"
+                                autoFocus
+                                value={editQuantity}
+                                onChange={(e) =>
+                                  setEditQuantity(e.target.value)
+                                }
+                                className="h-7 w-20 shrink-0 rounded border border-[#FFE7BA] px-2 text-xs outline-none focus:border-[#FA8C00]"
+                              />
+                              <span className="shrink-0 text-xs text-gray-400">
+                                {ing.unit}
+                              </span>
+                            </div>
+                          ) : (
+                            <p className="truncate text-xs text-gray-400">
+                              Cần {ing.quantityRequired} {ing.unit} / sản phẩm ·
+                              Tồn kho {ing.currentStock} {ing.unit}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <span
-                        className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${cfg.tagCls}`}
-                      >
-                        {cfg.tag}
-                      </span>
+
+                      <div className="flex shrink-0 items-center gap-1.5 whitespace-nowrap">
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${cfg.tagCls}`}
+                        >
+                          {cfg.tag}
+                        </span>
+                        {isEditing ? (
+                          <>
+                            <button
+                              onClick={() => handleSaveQuantity(ing)}
+                              disabled={updatingQuantity}
+                              className="flex h-7 w-7 items-center justify-center rounded border border-emerald-200 text-emerald-600 hover:bg-emerald-50 disabled:opacity-50"
+                            >
+                              <Check className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={cancelEdit}
+                              className="flex h-7 w-7 items-center justify-center rounded border border-gray-200 text-gray-400 hover:bg-gray-50"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => startEdit(ing)}
+                              className="flex h-7 w-7 items-center justify-center rounded border border-[#FFE7BA] text-[#5B3A0A] hover:bg-[#FFF7E6]"
+                            >
+                              <Pencil className="h-3.5 w-3.5" />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteIngredient(ing)}
+                              disabled={deletingIngredient}
+                              className="flex h-7 w-7 items-center justify-center rounded border border-rose-200 text-rose-500 hover:bg-rose-50 disabled:opacity-50"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   );
                 })}

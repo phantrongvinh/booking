@@ -18,7 +18,6 @@ const editVoucher = async (id, form) => {
   return res.data;
 };
 
-
 // Lấy danh sách tất cả voucher
 const fetchVouchers = async () => {
   const { data } = await axiosClient.get(url);
@@ -72,7 +71,10 @@ const voucherAPI = {
   fetchUnusedVouchers,
   searchVouchers,
   filterVouchers,
-  applyVoucher,getAllVouchers, postVoucher, editVoucher 
+  applyVoucher,
+  getAllVouchers,
+  postVoucher,
+  editVoucher,
 };
 
 export default voucherAPI;

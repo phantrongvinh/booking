@@ -14,6 +14,11 @@ import StatCard from "@/components/staff/StatCard";
 import IngredientModal from "@/components/staff/IngredientModal";
 import Pagination from "@/components/Pagination";
 import ToastNotification from "@/components/admin/ToastNotification";
+import {
+  getTodayCheckCount,
+  incrementTodayCheckCount,
+  isUpdatedToday,
+} from "@/lib/ingredientCheckHelper";
 
 const LOW_STOCK = 10;
 
@@ -81,6 +86,9 @@ const StaffIngredient = () => {
   };
 
   const handleSaved = () => {
+    if (selected) {
+      incrementTodayCheckCount(selected.ingredientId);
+    }
     reloadList();
     setModalOpen(false);
     setToast({ message: "Đã cập nhật kiểm kê nguyên liệu.", type: "success" });
@@ -165,7 +173,9 @@ const StaffIngredient = () => {
                 <th className="px-4 py-3 text-right">Tồn kho</th>
                 <th className="px-4 py-3 text-right">Đơn giá</th>
                 <th className="px-4 py-3 text-left">Trạng thái</th>
-                <th className="px-4 py-3 text-center">Hành động</th>
+                <th className="px-4 py-3 text-center">Trạng thái</th>
+
+                <th className="px-4 py-3 text-right">Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -217,7 +227,22 @@ const StaffIngredient = () => {
                           {badge.t}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-4 py-3 text-center font-medium text-[#5B3A0A]">
+                        <div>
+                          <p>{i.name}</p>
+                          {isUpdatedToday(i.updatedAt) && (
+                            <div className="mt-1 flex items-center justify-center gap-1">
+                              <ClipboardCheck className="h-3 w-3 text-blue-500" />
+                              <span className="text-[10px] font-medium text-blue-600">
+                                Đã kiểm kê hôm nay
+                                {getTodayCheckCount(i.ingredientId) > 1 &&
+                                  ` (${getTodayCheckCount(i.ingredientId)} lần)`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-end">
                         <button
                           onClick={() => openCount(i)}
                           className="inline-flex items-center gap-1.5 rounded-lg border border-[#FFE7BA] px-3 py-1.5 text-xs font-semibold text-[#5B3A0A] transition-all hover:border-[#FA8C00] hover:text-[#FA8C00]"

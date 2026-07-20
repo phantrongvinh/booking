@@ -28,6 +28,8 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
     async () => {
       if (!orderId) return { order: null };
       const res = await dispatch(getOrderById(orderId)).unwrap();
+      console.log(res);
+
       return { order: res.data };
     },
     { initialData: { order: null } },

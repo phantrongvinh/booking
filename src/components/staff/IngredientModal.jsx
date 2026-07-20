@@ -1,16 +1,26 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { X, ClipboardCheck } from "lucide-react";
+import { X, ClipboardCheck, AlertTriangle } from "lucide-react";
 import { useSubmit } from "@/hook/customHook";
 import { updateIngredientStock } from "@/store/slices/ingredientSlice";
+import { getTodayCheckCount } from "@/lib/ingredientCheckHelper";
 
 const IngredientModal = ({ open, onClose, ingredient, onSaved }) => {
   const dispatch = useDispatch();
   const [actual, setActual] = useState("");
+  const [confirmedRecheck, setConfirmedRecheck] = useState(false);
 
   useEffect(() => {
-    if (open && ingredient) setActual(String(ingredient.currentStock));
+    if (open && ingredient) {
+      setActual(String(ingredient.currentStock));
+      setConfirmedRecheck(false);
+    }
   }, [open, ingredient]);
+
+  const todayCheckCount = ingredient
+    ? getTodayCheckCount(ingredient.ingredientId)
+    : 0;
+  const alreadyCheckedToday = todayCheckCount > 0;
 
   const { submit, loading, error, reset } = useSubmit(
     async ({ name, currentStock }) => {
@@ -33,6 +43,7 @@ const IngredientModal = ({ open, onClose, ingredient, onSaved }) => {
     ingredient.currentStock > 0 ? (loss / ingredient.currentStock) * 100 : 0;
 
   const handleSave = () => {
+    if (alreadyCheckedToday && !confirmedRecheck) return;
     submit({ name: ingredient.name, currentStock: actualNum });
   };
 
@@ -120,6 +131,32 @@ const IngredientModal = ({ open, onClose, ingredient, onSaved }) => {
             </p>
           </div>
 
+          {alreadyCheckedToday && (
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-amber-700">
+                    Đã kiểm kê {todayCheckCount} lần hôm nay
+                  </p>
+                  <p className="mt-0.5 text-xs text-amber-600">
+                    Nguyên liệu này đã được kiểm kê trong hôm nay. Xác nhận nếu
+                    bạn vẫn muốn kiểm kê lại.
+                  </p>
+                  <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs font-medium text-amber-700">
+                    <input
+                      type="checkbox"
+                      checked={confirmedRecheck}
+                      onChange={(e) => setConfirmedRecheck(e.target.checked)}
+                      className="h-4 w-4 accent-amber-600"
+                    />
+                    Tôi xác nhận muốn kiểm kê lại
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
           {error && (
             <p className="text-xs font-medium text-rose-600">
               Cập nhật thất bại, vui lòng thử lại.
@@ -136,7 +173,7 @@ const IngredientModal = ({ open, onClose, ingredient, onSaved }) => {
           </button>
           <button
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading || (alreadyCheckedToday && !confirmedRecheck)}
             className="rounded-lg bg-[#FA8C00] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#E07E00] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? "Đang lưu..." : "Lưu kiểm kê"}
