@@ -6,8 +6,6 @@ import * as yup from "yup";
 import { X, Ticket } from "lucide-react";
 import { useFetch, useSubmit } from "@/hook/customHook";
 import { editVoucher, postVoucher } from "@/store/slices/voucherSlice";
-// TODO: chưa có thunk update — cần bạn gửi khi có, hiện dùng chung DTO với postVoucher
-// import { updateVoucher } from "@/store/slices/voucherSlice";
 import { fetchAllProduct } from "@/store/slices/productSlice";
 import { discountTypeOptions, applyScopeOptions } from "@/lib/voucherConstants";
 import ToastNotification from "../ToastNotification";

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 
 import cartAPI from "@/api/cartAPI";
+import ulti from "@/ultis/ulti";
 
 const ProductInfo = ({ product }) => {
   const handleAddToCart = async () => {
@@ -32,7 +33,21 @@ const ProductInfo = ({ product }) => {
 
         <div className="mt-auto">
           <div className="text-3xl font-bold text-orange-500 mb-6">
-            {(product.price ?? 0).toLocaleString("vi-VN")}đ
+            {product.salePrice && product.salePrice < product.price ? (
+              <div className="flex flex-col gap-1">
+                <span className="text-xl font-bold text-[#FF7A00]">
+                  {ulti.formatVND(product.salePrice)}
+                </span>
+
+                <span className="text-sm text-gray-400 line-through">
+                  {ulti.formatVND(product.price)}
+                </span>
+              </div>
+            ) : (
+              <span className="text-xl font-bold text-[#FF7A00]">
+                {ulti.formatVND(product.price)}
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col gap-3">

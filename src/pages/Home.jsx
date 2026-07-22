@@ -28,7 +28,7 @@ const Home = () => {
 
   // best seller
   const productBestSale = [...products]
-    // .sort((a, b) => b.soldQuantity - a.soldQuantity)
+    .sort((a, b) => b.soldQuantity - a.soldQuantity)
     .slice(0, 8)
     .map((item) => ({
       ...item,
@@ -38,7 +38,7 @@ const Home = () => {
     }));
 
   const newProducts = [...products]
-    .sort((a, b) => b.createdAt - a.createdAt)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 8)
     .map((item) => ({
       ...item,
@@ -166,7 +166,7 @@ const Home = () => {
                     slidesPerView: 5,
                   },
                 }}
-                className="h-full [--swiper-navigation-color:#000000]"
+                className="h-full [--swiper-navigation-color:#000000] shrink-0 flex"
               >
                 {newProducts.map((product, index) => (
                   <SwiperSlide

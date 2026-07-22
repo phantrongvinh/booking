@@ -25,7 +25,7 @@ const navItems = [
   { to: "/admin/adstaff", label: "Nhân viên", icon: UserPen, end: true },
   { to: "/admin/advouchers", label: "Voucher", icon: Ticket, end: true },
   {
-    to: "/admin/promotions",
+    to: "/admin/adpromotions",
     label: "Khuyến mãi",
     icon: CirclePercent,
     end: true,
