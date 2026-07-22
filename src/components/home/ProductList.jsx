@@ -5,6 +5,9 @@ import { ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const ProductList = ({ data }) => {
+  const hasSale =
+    data.salePrice != null && data.salePrice > 0 && data.salePrice < data.price;
+
   return (
     <Card className="border border-[#FFF8E8] overflow-hidden rounded-2xl hover:shadow-md transition h-full w-full flex flex-col">
       <CardHeader className="p-0 h-80 flex items-center justify-center relative shrink-0">
@@ -19,6 +22,11 @@ const ProductList = ({ data }) => {
           alt={data.name}
           className="h-full w-full object-cover"
         />
+        {data.salePrice && data.salePrice < data.price && (
+          <div className="absolute top-4 right-4 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow">
+            -{Math.round((1 - data.salePrice / data.price) * 100)}%
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="p-4 flex flex-col flex-1">
@@ -32,21 +40,38 @@ const ProductList = ({ data }) => {
           </p>
         </Link>
 
-        <div className="mt-4 items-center">
-          <span className="text-xl font-bold text-[#FF7A00]">
-            {ulti.formatVND(data.price)}
-          </span>
+        <div className="mt-4">
+          <div className="mt-4 min-h-[52px] flex flex-col justify-center">
+            {hasSale ? (
+              <>
+                <span className="text-xl font-bold text-[#FF7A00]">
+                  {ulti.formatVND(data.salePrice)}
+                </span>
+
+                <span className="text-sm text-gray-400 line-through">
+                  {ulti.formatVND(data.price)}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className="text-xl font-bold text-[#FF7A00]">
+                  {ulti.formatVND(data.price)}
+                </span>
+
+                <span className="text-sm invisible">0</span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-between mt-auto pt-2">
-          <ButtonCustom
-            name="Mua ngay"
-            size="lg"
-            color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00] transition-colors"
-          ></ButtonCustom>
-          <div className="border border-[#FF7A00] text-[#FF7A00] rounded-full p-2 hover:bg-[#FF7A00] hover:text-[#FFF000] cursor-pointer transition-colors">
-            <ShoppingBag />
-          </div>
+          <Link to={`/menu/${data.productId}`}>
+            <ButtonCustom
+              name="Mua ngay"
+              size="lg"
+              color="border-[#FF7A00] text-[#FF7A00] hover:bg-[#FF7A00] transition-colors"
+            ></ButtonCustom>
+          </Link>
         </div>
       </CardContent>
     </Card>

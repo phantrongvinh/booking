@@ -6,6 +6,7 @@ const formatVND = (amount) => {
     minimumFractionDigits: 0,
   }).format(amount);
 };
+
 // format ngày tháng năm
 const formatDate = (date) => {
   if (!date) return "";
@@ -29,6 +30,18 @@ const formatDateTime = (date) => {
     second: "2-digit",
     hour12: false,
   }).format(new Date(date));
+};
+
+const formatDateDetail = (date) => {
+  if (!date) return "";
+
+  const d = new Date(date);
+
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 };
 
 // giới hạn đoạn văn
@@ -133,5 +146,6 @@ const ulti = {
   slugify,
   formatDate,
   formatDateTime,
+  formatDateDetail,
 };
 export default ulti;
