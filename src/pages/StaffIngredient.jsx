@@ -39,6 +39,7 @@ const StaffIngredient = () => {
   const {
     data: { ingredients },
     fetch: reloadList,
+    loading,
   } = useFetch(
     async () => {
       const ingredients = await dispatch(fetchAllIngredient()).unwrap();
@@ -179,7 +180,36 @@ const StaffIngredient = () => {
               </tr>
             </thead>
             <tbody>
-              {pageItems.length === 0 ? (
+              {loading ? (
+                [...Array(5)].map((_, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-t border-[#FFE7BA] animate-pulse"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-28 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-10 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3 flex justify-end">
+                      <div className="h-4 w-16 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3 flex justify-end">
+                      <div className="h-4 w-20 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-5 w-16 rounded-full bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="mx-auto h-4 w-24 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3 flex justify-end">
+                      <div className="h-7 w-20 rounded-lg bg-[#FFE7BA]" />
+                    </td>
+                  </tr>
+                ))
+              ) : pageItems.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}

@@ -146,39 +146,56 @@ const StaffHome = () => {
             </Link>
           </div>
           <div className="space-y-2">
-            {recentPendingOrders.length === 0 && (
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5 animate-pulse"
+                >
+                  <div className="space-y-1.5">
+                    <div className="h-3.5 w-32 rounded bg-[#FFE7BA]" />
+                    <div className="h-3 w-20 rounded bg-[#FFE7BA]/60" />
+                  </div>
+                  <div className="space-y-1.5 text-right">
+                    <div className="h-3.5 w-20 rounded bg-[#FFE7BA] ml-auto" />
+                    <div className="h-3 w-14 rounded bg-[#FFE7BA]/60 ml-auto" />
+                  </div>
+                </div>
+              ))
+            ) : recentPendingOrders.length === 0 ? (
               <p className="py-6 text-center text-sm text-gray-400">
                 Không có đơn nào đang chờ.
               </p>
-            )}
-            {recentPendingOrders.slice(0, 5).map((o) => (
-              <div
-                key={o.orderId}
-                className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5"
-              >
-                <div>
-                  <p className="text-sm font-semibold text-[#5B3A0A]">
-                    #{o.orderId} · {o.customerName}
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    {ulti.formatDateTime(new Date(o.createdAt))}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-bold text-[#FA8C00]">
-                    {ulti.formatVND(o.totalPrice)}
-                  </p>
-                  <span
-                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[o.status]}`}
-                  >
+            ) : (
+              recentPendingOrders.map((o) => (
+                <div
+                  key={o.orderId}
+                  className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#5B3A0A]">
+                      #{o.orderId} · {o.customerName}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {ulti.formatDateTime(new Date(o.createdAt))}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-[#FA8C00]">
+                      {ulti.formatVND(o.totalPrice)}
+                    </p>
                     <span
-                      className={`h-1.5 w-1.5 rounded-full ${statusDot[o.status]}`}
-                    />
-                    {o.status}
-                  </span>
+                      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold ${statusStyles[o.status]}`}
+                    >
+                      <span
+                        className={`h-1.5 w-1.5 rounded-full ${statusDot[o.status]}`}
+                      />
+                      {o.status}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
 
@@ -196,39 +213,56 @@ const StaffHome = () => {
             </Link>
           </div>
           <div className="space-y-2">
-            {lowIngredientsList.length === 0 && (
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5 animate-pulse"
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 rounded bg-[#FFE7BA]" />
+                    <div className="space-y-1.5">
+                      <div className="h-3.5 w-24 rounded bg-[#FFE7BA]" />
+                      <div className="h-3 w-32 rounded bg-[#FFE7BA]/60" />
+                    </div>
+                  </div>
+                  <div className="h-5 w-14 rounded-full bg-[#FFE7BA]" />
+                </div>
+              ))
+            ) : lowIngredientsList.length === 0 ? (
               <p className="py-6 text-center text-sm text-gray-400">
                 Tất cả nguyên liệu đều đủ.
               </p>
-            )}
-            {lowIngredientsList.map((i) => {
-              const out = i.currentStock === 0;
-              return (
-                <div
-                  key={i.id}
-                  className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5"
-                >
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle
-                      className={`h-4 w-4 ${out ? "text-rose-500" : "text-amber-500"}`}
-                    />
-                    <div>
-                      <p className="text-sm font-semibold text-[#5B3A0A]">
-                        {i.name}
-                      </p>
-                      <p className="text-xs text-gray-400">
-                        Còn {i.currentStock} {i.unit} / tối thiểu 10 {i.unit}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${out ? "border-rose-200 bg-rose-50 text-rose-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}
+            ) : (
+              lowIngredientsList.map((i) => {
+                const out = i.currentStock === 0;
+                return (
+                  <div
+                    key={i.id}
+                    className="flex items-center justify-between rounded-lg border border-[#FFE7BA] px-3 py-2.5"
                   >
-                    {out ? "Hết hàng" : "Sắp hết"}
-                  </span>
-                </div>
-              );
-            })}
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle
+                        className={`h-4 w-4 ${out ? "text-rose-500" : "text-amber-500"}`}
+                      />
+                      <div>
+                        <p className="text-sm font-semibold text-[#5B3A0A]">
+                          {i.name}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Còn {i.currentStock} {i.unit} / tối thiểu 10 {i.unit}
+                        </p>
+                      </div>
+                    </div>
+                    <span
+                      className={`rounded-full border px-2 py-0.5 text-xs font-semibold ${out ? "border-rose-200 bg-rose-50 text-rose-700" : "border-amber-200 bg-amber-50 text-amber-700"}`}
+                    >
+                      {out ? "Hết hàng" : "Sắp hết"}
+                    </span>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

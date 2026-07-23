@@ -230,15 +230,16 @@ export default function ProductModal({
       },
     });
 
+  // handle delete
+  const [confirmDel, setConfirmDel] = useState(null);
+
   const handleDeleteIngredient = (ing) => {
     const ingredientId = ingredientIdByName[ing.ingredientName];
     if (!ingredientId) {
       setToast({ message: "Không tìm thấy ID nguyên liệu.", type: "error" });
       return;
     }
-    if (!window.confirm(`Xóa "${ing.ingredientName}" khỏi sản phẩm này?`))
-      return;
-    submitDeleteIngredient({ ingredientId });
+    setConfirmDel({ ingredientId, name: ing.ingredientName });
   };
 
   if (!open || !product) return null;
@@ -307,9 +308,7 @@ export default function ProductModal({
             {!recipe ? (
               <p className="text-xs text-gray-400">Đang tải nguyên liệu...</p>
             ) : ingredients.length === 0 ? (
-              <p className="text-xs text-gray-400">
-                Không có dữ liệu nguyên liệu.
-              </p>
+              <p className="text-xs text-gray-400">Chưa cập nhật nguyên liệu</p>
             ) : (
               <div className="space-y-2">
                 {ingredients.map((ing) => {
@@ -488,6 +487,42 @@ export default function ProductModal({
           type={toast.type}
           onClose={() => setToast(null)}
         />
+      )}
+      {confirmDel && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40">
+          <div className="w-[320px] rounded-2xl bg-white p-6 shadow-2xl">
+            <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-rose-50">
+              <Trash2 className="h-5 w-5 text-rose-500" />
+            </div>
+            <h3 className="font-bold text-[#5B3A0A]">Xóa nguyên liệu</h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Bạn có chắc muốn xóa{" "}
+              <span className="font-semibold text-[#5B3A0A]">
+                "{confirmDel.name}"
+              </span>{" "}
+              khỏi sản phẩm này?
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setConfirmDel(null)}
+                className="flex-1 rounded-xl border border-[#FFE7BA] py-2 text-sm font-semibold text-[#5B3A0A] hover:bg-[#FFF7E6]"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  submitDeleteIngredient({
+                    ingredientId: confirmDel.ingredientId,
+                  });
+                  setConfirmDel(null);
+                }}
+                className="flex-1 rounded-xl bg-rose-500 py-2 text-sm font-semibold text-white hover:bg-rose-600"
+              >
+                Xóa
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

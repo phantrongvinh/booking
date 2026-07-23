@@ -255,13 +255,43 @@ const StaffProduct = () => {
               <tr>
                 <th className="px-4 py-3 text-left">Sản phẩm</th>
                 <th className="px-4 py-3 text-left">Danh mục</th>
+                <th className="px-4 py-3 text-left">Size</th>
                 <th className="px-4 py-3 text-right">Giá bán</th>
                 <th className="px-4 py-3 text-left">Nguyên liệu</th>
                 <th className="px-4 py-3 text-left">Trạng thái</th>
               </tr>
             </thead>
             <tbody>
-              {pageItems.length === 0 ? (
+              {loading ? (
+                [...Array(5)].map((_, idx) => (
+                  <tr
+                    key={idx}
+                    className="border-t border-[#FFE7BA] animate-pulse"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 shrink-0 rounded-lg bg-[#FFE7BA]" />
+                        <div className="h-4 w-28 rounded bg-[#FFE7BA]" />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-20 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-10 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3 flex justify-end">
+                      <div className="h-4 w-16 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-24 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-5 w-16 rounded-full bg-[#FFE7BA]" />
+                    </td>
+                  </tr>
+                ))
+              ) : pageItems.length === 0 ? (
                 <tr>
                   <td
                     colSpan={5}
@@ -293,6 +323,7 @@ const StaffProduct = () => {
                     <td className="px-4 py-3 text-gray-500">
                       {p.categoryName}
                     </td>
+                    <td className="px-4 py-3 text-gray-500">{p.sizeName}</td>
                     <td className="px-4 py-3 text-right font-semibold text-[#FA8C00]">
                       {ulti.formatVND(p.salePrice ?? p.price)}
                     </td>

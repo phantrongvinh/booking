@@ -39,6 +39,7 @@ const ProductCard = ({ product }) => {
             className="h-full w-full object-cover"
           />
         </div>
+
         {product.salePrice && product.salePrice < product.price && (
           <div className="absolute top-4 right-4 rounded-full bg-red-500 px-3 py-1 text-xs font-bold text-white shadow">
             -{Math.round((1 - product.salePrice / product.price) * 100)}%
@@ -50,6 +51,9 @@ const ProductCard = ({ product }) => {
         <h3 className="font-bold text-base line-clamp-2 min-h-12">
           {product.name}
         </h3>
+        <p className="mt-2 text-sm text-slate-500 text-[#8A6852] line-clamp-2">
+          Size: {product.sizeName}
+        </p>
 
         <div className="mt-3 flex items-start justify-between">
           <span className="font-bold text-lg text-orange-500">

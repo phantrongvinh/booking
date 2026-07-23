@@ -25,6 +25,7 @@ const StaffOrder = () => {
   const {
     data: { orders },
     fetch: reloadList,
+    loading,
   } = useFetch(
     async () => {
       const res = await dispatch(fetchOrder()).unwrap();
@@ -207,7 +208,35 @@ const StaffOrder = () => {
               </tr>
             </thead>
             <tbody>
-              {pageItems.length === 0 ? (
+              {loading ? (
+                [...Array(5)].map((_, i) => (
+                  <tr
+                    key={i}
+                    className="border-t border-[#FFE7BA] animate-pulse"
+                  >
+                    <td className="px-4 py-3">
+                      <div className="h-4 w-12 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3 space-y-1.5">
+                      <div className="h-3.5 w-28 rounded bg-[#FFE7BA]" />
+                      <div className="h-3 w-20 rounded bg-[#FFE7BA]/60" />
+                    </td>
+                    <td className="px-4 py-3 space-y-1.5">
+                      <div className="h-3.5 w-20 rounded bg-[#FFE7BA]" />
+                      <div className="h-3 w-14 rounded bg-[#FFE7BA]/60" />
+                    </td>
+                    <td className="px-4 py-3 flex justify-end">
+                      <div className="h-4 w-16 rounded bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="h-5 w-24 rounded-full bg-[#FFE7BA]" />
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="mx-auto h-8 w-8 rounded-lg bg-[#FFE7BA]" />
+                    </td>
+                  </tr>
+                ))
+              ) : pageItems.length === 0 ? (
                 <tr>
                   <td
                     colSpan={6}
@@ -248,10 +277,7 @@ const StaffOrder = () => {
                     </td>
                     <td className="px-4 py-3">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
-                          statusStyles[o.status] ??
-                          "border-gray-200 bg-gray-50 text-gray-500"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${statusStyles[o.status] ?? "border-gray-200 bg-gray-50 text-gray-500"}`}
                       >
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${statusDot[o.status] ?? "bg-gray-400"}`}
