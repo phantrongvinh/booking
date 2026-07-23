@@ -64,6 +64,11 @@ const importPromotion = async (file) => {
   return res.data;
 };
 
+const getPromotionOngoing = async () => {
+  const res = await axiosClient.get(`${url}/ongoing`);
+  return res.data;
+};
+
 const promotionAPI = {
   getPromotion,
   postPromotion,
@@ -73,6 +78,7 @@ const promotionAPI = {
   addPromotionOnProduct,
   deletePromotionOnProduct,
   importPromotion,
+  getPromotionOngoing,
 };
 
 export default promotionAPI;

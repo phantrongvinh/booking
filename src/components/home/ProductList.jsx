@@ -41,6 +41,9 @@ const ProductList = ({ data }) => {
         </Link>
 
         <div className="mt-4">
+          <p className="mt-2 text-sm text-slate-500 text-[#8A6852] line-clamp-2">
+            Size: {data.sizeName}
+          </p>
           <div className="mt-4 min-h-[52px] flex flex-col justify-center">
             {hasSale ? (
               <>

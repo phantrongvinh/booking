@@ -28,7 +28,6 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
     async () => {
       if (!orderId) return { order: null };
       const res = await dispatch(getOrderById(orderId)).unwrap();
-      console.log(res);
 
       return { order: res.data };
     },
@@ -50,12 +49,12 @@ const OrderModal = ({ open, onClose, mode, orderId, onUpdated }) => {
       const res = await dispatch(
         updateOrderStatus({ orderId, newStatus, note }),
       ).unwrap();
-      console.log(res);
     },
     {
       onSuccess: () => {
         setNote("");
         setSelectedStatus("");
+        reloadOrder();
         onUpdated?.("Đã cập nhật trạng thái đơn hàng.");
       },
       onError: (err) => {

@@ -107,10 +107,25 @@ export const importPromotion = createAsyncThunk(
   async (file, { rejectWithValue }) => {
     try {
       const res = await promotionAPI.importPromotion(file);
+
       return res.data;
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message ?? "Import thất bại",
+      );
+    }
+  },
+);
+
+export const getPromotionOngoing = createAsyncThunk(
+  "promotion/Ongoing",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await promotionAPI.getPromotionOngoing();
+      return res.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message ?? "Không có khuyến mãi",
       );
     }
   },
@@ -123,6 +138,7 @@ const promotionSlice = createSlice({
     loading: false,
     error: null,
     message: null,
+    promotionOngoing: [],
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -136,6 +152,18 @@ const promotionSlice = createSlice({
         state.promotions = action.payload;
       })
       .addCase(getPromotion.rejected, (state, action) => {
+        state.loading = false;
+        state.error = "Không có khuyến mãi";
+      })
+      .addCase(getPromotionOngoing.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(getPromotionOngoing.fulfilled, (state, action) => {
+        state.loading = false;
+        state.promotionOngoing = action.payload;
+      })
+      .addCase(getPromotionOngoing.rejected, (state, action) => {
         state.loading = false;
         state.error = "Không có khuyến mãi";
       });

@@ -29,6 +29,9 @@ const ProductInfo = ({ product }) => {
           <p className="mt-4 text-gray-700 leading-relaxed">
             {product.description}
           </p>
+          <p className="mt-2 text-sm text-slate-500 text-[#8A6852] line-clamp-2">
+            Size: {product.sizeName}
+          </p>
         </div>
 
         <div className="mt-auto">

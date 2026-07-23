@@ -1,5 +1,6 @@
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { User, Bell, ShoppingBag, Heart, Ticket, Lock } from "lucide-react";
+import { useSelector } from "react-redux";
 
 const nav = [
   { to: "/account", label: "Thông tin cá nhân", icon: User, exact: true },
@@ -32,10 +33,17 @@ const nav = [
 
 const AccountLayout = () => {
   const { pathname } = useLocation();
-
+  const { isAdmin } = useSelector((state) => state.auth);
   // notification
   const notifications = [];
   const unread = notifications.filter((n) => !n.isRead).length;
+
+  const filteredNav = nav.filter((item) => {
+    if (isAdmin && ["/account/orders", "/account/vouchers"].includes(item.to)) {
+      return false;
+    }
+    return true;
+  });
 
   return (
     <div className="bg-[#FFFBF2] h-[100vh]">
@@ -43,7 +51,7 @@ const AccountLayout = () => {
         {/* Sidebar */}
         <aside className="shrink-0 md:w-64 sticky top-4">
           <nav className="flex gap-1 overflow-x-auto rounded-2xl border border-[#FFE7BA] bg-white p-2 md:flex-col md:overflow-visible ">
-            {nav.map((item) => {
+            {filteredNav.map((item) => {
               const active = item.exact
                 ? pathname === item.to
                 : pathname.startsWith(item.to);

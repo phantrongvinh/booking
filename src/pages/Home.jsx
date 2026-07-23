@@ -10,6 +10,7 @@ import { useFetch } from "@/hook/customHook";
 import { useDispatch } from "react-redux";
 import { fetchAllProduct } from "@/store/slices/productSlice";
 import ulti from "@/ultis/ulti";
+import PromotionSlideshow from "@/components/home/PromotionSlideShow";
 
 const Home = () => {
   // fetch products best seller, newest
@@ -66,6 +67,8 @@ const Home = () => {
         <div className="py-20">
           <Category></Category>
         </div>
+
+        <PromotionSlideshow></PromotionSlideshow>
 
         {/* Sản phẩm bán chạy */}
         {/* Sử dụng Card shadcn và truyền props vào component ProductList */}

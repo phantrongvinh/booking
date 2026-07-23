@@ -71,12 +71,15 @@ const AdPromotion = () => {
       onSuccess: () => {
         setDel(null);
         setToast({ message: "Đã xóa khuyến mãi.", type: "success" });
+        reloadList();
       },
-      onError: (err) =>
+      onError: (err) => {
         setToast({
           message: typeof err === "string" ? err : "Xóa thất bại.",
           type: "error",
-        }),
+        });
+        reloadList();
+      },
     },
   );
 
@@ -84,8 +87,30 @@ const AdPromotion = () => {
   const { submit: doImport, loading: importing } = useSubmit(
     (formData) => dispatch(importPromotion(formData)).unwrap(),
     {
-      onSuccess: () => {
-        setToast({ message: "Import thành công!", type: "success" });
+      onSuccess: (result) => {
+        const { successCount, failCount, errors } = result.data ?? result;
+
+        if (failCount === 0) {
+          // Toàn bộ thành công
+          setToast({
+            message: `Import thành công ${successCount} dòng!`,
+            type: "success",
+          });
+        } else if (successCount === 0) {
+          // Toàn bộ thất bại
+          setToast({
+            message: `Import thất bại ${failCount} dòng`,
+            type: "error",
+            errors,
+          });
+        } else {
+          // Một phần thành công
+          setToast({
+            message: `Import xong: ${successCount} thành công, ${failCount} thất bại`,
+            type: "warning",
+            errors,
+          });
+        }
         reloadList();
       },
       onError: (err) =>
@@ -96,13 +121,16 @@ const AdPromotion = () => {
     },
   );
 
+  // import
+  const [showImportTip, setShowImportTip] = useState(false);
+
   const handleImportChange = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const formData = new FormData();
     formData.append("file", file);
     doImport(formData);
-    e.target.value = ""; // reset input
+    e.target.value = "";
   };
 
   // Filter + search
@@ -171,7 +199,7 @@ const AdPromotion = () => {
   ).length;
 
   return (
-    <div className="p-6">
+    <>
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -184,14 +212,75 @@ const AdPromotion = () => {
         </div>
         <div className="flex gap-2">
           {/* Import Excel */}
-          <button
-            onClick={() => importRef.current?.click()}
-            disabled={importing}
-            className="inline-flex items-center gap-2 rounded-xl border border-[#FFE7BA] bg-white px-4 py-2.5 text-sm font-semibold text-[#5B3A0A] hover:bg-[#FFF7E6] disabled:opacity-50"
-          >
-            <FileUp className="h-4 w-4 text-[#FA8C00]" />
-            {importing ? "Đang import..." : "Import Excel"}
-          </button>
+          <div className="relative">
+            <button
+              onClick={() => importRef.current?.click()}
+              disabled={importing}
+              onMouseEnter={() => setShowImportTip(true)}
+              onMouseLeave={() => setShowImportTip(false)}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#FFE7BA] bg-white px-4 py-2.5 text-sm font-semibold text-[#5B3A0A] hover:bg-[#FFF7E6] disabled:opacity-50"
+            >
+              <FileUp className="h-4 w-4 text-[#FA8C00]" />
+              {importing ? "Đang import..." : "Import Excel"}
+            </button>
+
+            {/* Tooltip */}
+            {showImportTip && (
+              <div className="absolute top-full left-0 z-50 mt-2 w-72 rounded-xl border border-[#FFE7BA] bg-white p-3 shadow-lg">
+                {/* Arrow */}
+                <div className="absolute -top-1.5 left-5 h-3 w-3 rotate-45 border-l border-t border-[#FFE7BA] bg-white" />
+                <p className="mb-2 text-xs font-bold text-[#5B3A0A]">
+                  Yêu cầu file Excel
+                </p>
+                <ul className="space-y-1.5">
+                  {[
+                    { col: "A", label: "Tên sản phẩm", required: true },
+                    { col: "B", label: "Size", required: true },
+                    { col: "C", label: "Tiêu đề", required: true },
+                    { col: "D", label: "Nội dung", required: false },
+                    {
+                      col: "E",
+                      label: "Loại giảm giá (1-percent, 2-fixed)",
+                      required: true,
+                    },
+                    { col: "F", label: "Giá trị giảm", required: true },
+                    {
+                      col: "G",
+                      label: "Ngày bắt đầu (dd-mm-yyyy)",
+                      required: true,
+                    },
+                    {
+                      col: "H",
+                      label: "Ngày kết thúc (dd-mm-yyyy)",
+                      required: true,
+                    },
+                  ].map((r) => (
+                    <li key={r.col} className="flex items-start gap-2 text-xs">
+                      <span className="mt-0.5 shrink-0 rounded bg-[#FFF7E6] px-1.5 py-0.5 font-bold text-[#FA8C00]">
+                        {r.col}
+                      </span>
+                      <span className="text-gray-500">
+                        {r.label}
+                        {r.required && (
+                          <span className="ml-1 text-rose-400">*</span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-2 border-t border-[#FFE7BA] pt-2 space-y-1">
+                  <p className="text-[10px] text-gray-400">
+                    * Bắt buộc · Dòng đầu tiên là header
+                  </p>
+                  <p className="text-[10px] text-amber-500 flex items-center gap-1">
+                    <span>⚠</span> Cột ngày phải định dạng ô là{" "}
+                    <span className="font-semibold">Text</span>, nhập dd-mm-yyyy
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
           <input
             ref={importRef}
             type="file"
@@ -199,6 +288,7 @@ const AdPromotion = () => {
             className="hidden"
             onChange={handleImportChange}
           />
+
           {/* Tạo mới */}
           <button
             onClick={() => setModal({ open: true, promotion: null })}
@@ -249,12 +339,16 @@ const AdPromotion = () => {
               key={p.promotionId}
               className="rounded-2xl border border-[#FFE7BA] bg-white p-5 shadow-sm"
             >
-              {p.bannerUrl && (
+              {p.bannerUrl ? (
                 <img
                   src={p.bannerUrl}
                   alt={p.title}
                   className="mb-3 h-32 w-full rounded-xl object-cover"
                 />
+              ) : (
+                <div className="mb-3 flex h-32 w-full items-center justify-center rounded-xl border border-dashed border-[#FFE7BA] bg-[#FFF7E6]">
+                  <p className="text-xs text-[#5B3A0A]/40">Chưa có hình ảnh</p>
+                </div>
               )}
               <div className="flex items-start justify-between gap-2">
                 <div>
@@ -361,13 +455,14 @@ const AdPromotion = () => {
       {/* Toast */}
       {toast && (
         <ToastNotification
-          key={toast.message + Date.now()}
+          key={Date.now()}
           message={toast.message}
           type={toast.type}
+          errors={toast.errors ?? []}
           onClose={() => setToast(null)}
         />
       )}
-    </div>
+    </>
   );
 };
 
